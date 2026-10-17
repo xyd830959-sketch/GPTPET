@@ -8,6 +8,11 @@ $script:dataDir=$script:config.dataDir
 $null=New-Item -ItemType Directory -Path $script:dataDir -Force
 . (Join-Path $script:appDir 'runtime\quotes.ps1')
 . (Join-Path $script:appDir 'runtime\ui-settings.ps1')
+$script:wallpaperModuleAvailable=$false
+try {
+  . (Join-Path $script:appDir 'runtime\wallpaper-ui.ps1')
+  $script:wallpaperModuleAvailable=$true
+} catch { $script:wallpaperModuleAvailable=$false }
 . (Join-Path $script:appDir 'runtime\audio.ps1')
 . (Join-Path $script:appDir 'runtime\host-layer.ps1')
 . (Join-Path $script:appDir 'runtime\host-follow.ps1')

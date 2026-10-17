@@ -170,6 +170,7 @@ function Initialize-WidgetSettingsMenu {
   Add-SettingsDivider
   $script:settingsMenuUi.Tap=Add-SettingsAction '点角色也切换内容' {param($sender,$event)$script:bubbleTapAdvance=$sender.IsChecked;Save-Settings} -Description '开启后，连续点角色就能看下一句' -Checkable -ReturnItem
   } -ReturnItem
+  if($script:wallpaperModuleAvailable){try{Add-WallpaperSettingsMenu}catch{$script:wallpaperModuleAvailable=$false}}
   Add-SettingsDivider
   $exit=Add-SettingsAction '退出 GPT 娘' {Exit-WidgetForSession} -ReturnItem;$exit.Foreground=[Windows.Media.BrushConverter]::new().ConvertFromString('#A1788D')
   $script:context.Add_Opened({Update-WidgetSettingsMenu;Set-WidgetMenuBounds;Position-WidgetMenuToHost});Update-WidgetSettingsMenu;$script:window.ContextMenu=$script:context
@@ -220,6 +221,7 @@ function Update-WidgetSettingsMenu{
     $script:settingsMenuUi.ColorPause.IsChecked=$script:colorPaused;$script:settingsMenuUi.ColorPause.IsEnabled=$script:colorMode-ne 'original'
     $script:settingsMenuUi.Volume.Value=$script:persistedSoundVolume;$script:settingsMenuUi.Volume.IsEnabled=$script:soundOn;$script:settingsMenuUi.VolumeText.Text=([Math]::Round($script:persistedSoundVolume*100)).ToString()+'%'
     $script:sizeSlider.Value=$script:scale;$script:settingsMenuUi.SizeText.Text=([Math]::Round($script:scale*100)).ToString()+'%';Update-WidgetSizePresets
+    if($script:wallpaperModuleAvailable){try{Update-WallpaperSettingsMenu}catch{}}
   }finally{$script:settingsMenuSync=$false}
 }
 
