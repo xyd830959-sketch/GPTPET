@@ -31,6 +31,8 @@
 
 实机测试将项目现有 `assets/gpt-dragon-niang-bust.png` 导入独立测试目录：Codex 主页面 1/1 应用成功，`body` 的计算背景包含该 PNG，`#root` 和页面表面透明；恢复后本模块样式和标记均消失，开关最终关闭。测试没有改动正式 GPT 娘数据或 Codex 安装文件。正式运行目录与原源码目录在此前测试后和 50 文件备份逐项比较，哈希差异为 0。
 
+本次测试结束后再次核对：正式目录和原源码的 50 个备份文件差异仍为 0，Codex 页面没有残留本模块样式。用户选择让 Codex Dream Skin 继续保持暂停；其 `C:\Users\user\AppData\Local\CodexDreamSkin\paused` 标记仍在，未获用户同意前不删除。现有 Codex 会话的 9335 调试端口仍会开放，直到完全退出客户端并按普通方式重启。
+
 ## 代码修改清单
 
 - `runtime/codex-wallpaper.mjs`：独立状态、图片导入校验、本机 CDP 应用与恢复。
