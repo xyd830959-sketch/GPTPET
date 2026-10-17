@@ -102,7 +102,8 @@ async function cdpTargets(port) {
   validateEndpoint(version.webSocketDebuggerUrl, port, null, 'browser');
   const pages = Array.isArray(targets) ? targets.filter(target =>
     target?.type === 'page' && typeof target.id === 'string' && /^[A-Za-z0-9._-]{1,200}$/.test(target.id) &&
-    typeof target.url === 'string' && /^app:\/\/codex(?:\/|$)/.test(target.url) &&
+    typeof target.url === 'string' &&
+    (target.url === 'app://-/index.html' || /^app:\/\/codex(?:\/|$)/.test(target.url)) &&
     !target.url.includes('avatar-overlay') && typeof target.webSocketDebuggerUrl === 'string') : [];
   if (!pages.length) throw new Error('调试连接中没有找到 Codex 页面。');
   return pages.map(page => ({ ...page, socket: validateEndpoint(page.webSocketDebuggerUrl, port, page.id, 'page') }));
@@ -145,8 +146,8 @@ html[${ROOT_ATTRIBUTE}="on"] #root, html[${ROOT_ATTRIBUTE}="on"] [data-app-shell
       document.documentElement.removeAttribute(attr);
       return !document.getElementById(id) && !document.documentElement.hasAttribute(attr);
     }
-    if (window.__CODEX_DREAM_SKIN_STATE__) throw new Error('Codex Dream Skin is active');
-    if (!document.body || !(document.getElementById('root') || document.querySelector('[data-app-shell-page-surface="true"]'))) throw new Error('Unknown Codex layout');
+    if (window.__CODEX_DREAM_SKIN_STATE__) return 'dream-skin-active';
+    if (!document.body || !(document.getElementById('root') || document.querySelector('[data-app-shell-page-surface="true"]'))) return 'unsupported-layout';
     let style = document.getElementById(id);
     if (!style) { style = document.createElement('style'); style.id = id; document.head.appendChild(style); }
     style.textContent = ${JSON.stringify(css)};
@@ -171,7 +172,10 @@ async function perform(action, paths, state) {
   }
   for (const page of pages) {
     try {
-      if (await evaluate(page.socket, rendererExpression(action, dataUrl)) === true) success++;
+      const result = await evaluate(page.socket, rendererExpression(action, dataUrl));
+      if (result === true) success++;
+      else if (result === 'dream-skin-active') lastError = new Error('Codex Dream Skin 正在使用中，请先暂停它再应用 GPT 娘壁纸。');
+      else if (result === 'unsupported-layout') lastError = new Error('当前 Codex 页面结构暂不支持壁纸。');
     } catch (error) { lastError = error; }
   }
   if (!success) throw new Error(lastError?.message || '壁纸操作未能在 Codex 页面生效。');

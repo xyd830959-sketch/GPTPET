@@ -14,7 +14,7 @@ const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR
 const image = path.join(dataDir, 'sample.png');
 fs.writeFileSync(image, png);
 
-function fakeRenderer() {
+function fakeRenderer(dreamSkinActive = false) {
   const nodes = new Map();
   const attributes = new Map();
   const document = {
@@ -30,11 +30,11 @@ function fakeRenderer() {
     querySelector() { return null; },
     createElement() { return { id: '', textContent: '' }; },
   };
-  return { nodes, attributes, context: { document, window: {} } };
+  return { nodes, attributes, context: { document, window: dreamSkinActive ? { __CODEX_DREAM_SKIN_STATE__: {} } : {} } };
 }
 
-async function mockCdp(pageUrl = 'app://codex/home') {
-  const renderer = fakeRenderer();
+async function mockCdp(pageUrl = 'app://codex/home', dreamSkinActive = false) {
+  const renderer = fakeRenderer(dreamSkinActive);
   const server = http.createServer((request, response) => {
     const port = server.address().port;
     response.setHeader('Content-Type', 'application/json');
@@ -103,6 +103,31 @@ test('wallpaper import, opt-in, CDP application and restoration stay in isolated
 
 test('a different app on the same debug port is never modified', async () => {
   const { server, port, renderer } = await mockCdp('app://other-app/home');
+  try {
+    await run('enable', dataDir);
+    await assert.rejects(run('apply', dataDir, undefined, { port }), /没有找到 Codex 页面/);
+    assert.equal(renderer.nodes.size, 0);
+  } finally {
+    await new Promise(resolve => server.close(resolve));
+    await run('disable', dataDir, undefined, { port });
+  }
+});
+
+test('current Codex route works and active Dream Skin remains untouched', async () => {
+  const { server, port, renderer } = await mockCdp('app://-/index.html', true);
+  try {
+    await run('enable', dataDir);
+    await assert.rejects(run('apply', dataDir, undefined, { port }), /Dream Skin 正在使用中/);
+    assert.equal(renderer.nodes.size, 0);
+    assert.equal((await run('restore', dataDir, undefined, { port })).restored, true);
+  } finally {
+    await new Promise(resolve => server.close(resolve));
+    await run('disable', dataDir, undefined, { port });
+  }
+});
+
+test('avatar overlay is never selected as the wallpaper page', async () => {
+  const { server, port, renderer } = await mockCdp('app://-/index.html?initialRoute=%2Favatar-overlay');
   try {
     await run('enable', dataDir);
     await assert.rejects(run('apply', dataDir, undefined, { port }), /没有找到 Codex 页面/);
