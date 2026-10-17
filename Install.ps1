@@ -1,4 +1,4 @@
-param([switch]$CheckOnly)
+﻿param([switch]$CheckOnly)
 $ErrorActionPreference='Stop'
 $appDir=$PSScriptRoot
 . (Join-Path $appDir 'runtime\supervisor-task.ps1')
@@ -24,7 +24,7 @@ if(!$codex){
 }
 if(!$codex){throw 'Codex executable unavailable. Install and open the Codex desktop app first.'}
 $marketplaceRoot=Split-Path $appDir -Parent
-foreach($file in @('widget.ps1','widget.xaml','launch.vbs','supervisor.vbs','assets\gpt-dragon-niang-bust.png','assets\quotes.json','assets\quote-layouts.json','assets\press.wav','assets\release.wav','runtime\quotes.ps1','runtime\ui-settings.ps1','runtime\color-theme.ps1','runtime\quote-layout.ps1','runtime\audio.ps1','runtime\host-layer.ps1','runtime\host-follow.ps1','runtime\supervisor.ps1','runtime\supervisor-task.ps1','runtime\start-supervisor.ps1','runtime\start-widget.ps1','runtime\metadata.mjs','runtime\mcp.mjs','runtime\usage.mjs','runtime\watch.mjs','runtime\control.mjs','runtime\refresh-queue.mjs','runtime\refresh-client.mjs','runtime\worker-state.mjs','.mcp.json','.codex-plugin\plugin.json')){
+foreach($file in @('widget.ps1','widget.xaml','launch.vbs','supervisor.vbs','打开Codex壁纸模式.cmd','assets\gpt-dragon-niang-bust.png','assets\quotes.json','assets\quote-layouts.json','assets\press.wav','assets\release.wav','runtime\quotes.ps1','runtime\ui-settings.ps1','runtime\wallpaper-ui.ps1','runtime\codex-wallpaper.mjs','runtime\start-codex-wallpaper.ps1','runtime\color-theme.ps1','runtime\quote-layout.ps1','runtime\audio.ps1','runtime\host-layer.ps1','runtime\host-follow.ps1','runtime\supervisor.ps1','runtime\supervisor-task.ps1','runtime\start-supervisor.ps1','runtime\start-widget.ps1','runtime\metadata.mjs','runtime\mcp.mjs','runtime\usage.mjs','runtime\watch.mjs','runtime\control.mjs','runtime\refresh-queue.mjs','runtime\refresh-client.mjs','runtime\worker-state.mjs','.mcp.json','.codex-plugin\plugin.json')){
   if(!(Test-Path -LiteralPath (Join-Path $appDir $file))){throw "Missing file: $file"}
 }
 $startup=[Environment]::GetFolderPath('Startup')

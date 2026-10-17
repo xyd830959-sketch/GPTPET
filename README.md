@@ -23,4 +23,6 @@
 
 壁纸应用需要 Codex 当前会话开放本机调试连接 `127.0.0.1:9335`。如果连接不可用，挂件的原有额度功能继续工作。此功能不修改 Codex 官方安装文件或核心配置；关闭 Codex 会话后，注入样式也会消失。Codex 更新可能影响页面兼容性，且目前没有自动重涂、轮换或动态壁纸功能。
 
+不使用 Dream Skin 时，先完全退出 Codex，再运行 `打开Codex壁纸模式.cmd`。启动器只定位已安装的官方 Codex 应用，使用独立的 `%LOCALAPPDATA%\GPTNiangUsage\codex-wallpaper-profile`，并在 Codex 页面就绪后自动应用已启用的 GPT 娘壁纸。首次使用时，如果电脑上有旧的 Dream Skin Codex 配置，启动器会在 Codex 完全关闭后复制到新目录；原目录不会被移动或删除。普通官方入口仍可启动 Codex，但不会开放壁纸所需的调试连接。
+
 原[实验记录](WALLPAPER_EXPERIMENT.md)保留了开发和实机验证过程。运行 `node --test tests/*.test.mjs` 可执行 Node 测试，运行 `powershell.exe -NoProfile -STA -ExecutionPolicy Bypass -File tests/run-windows-tests.ps1` 可执行 Windows 挂件测试。
