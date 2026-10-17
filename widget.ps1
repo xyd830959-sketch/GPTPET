@@ -195,6 +195,12 @@ function Set-Appearance {
   $script:lastPosition=$null
   if($script:hostEventTimer -and !$script:hostEventTimer.IsEnabled){$script:hostEventTimer.Start()}
 }
+function Get-WidgetTopLimit([int]$frameTop,[double]$dpi) {
+  # The character starts below transparent space reserved for the quota bubble.
+  # Let that space leave the screen while keeping the character draggable.
+  $characterTop=[Windows.Controls.Canvas]::GetTop($script:ui.Root)+[Windows.Controls.Canvas]::GetTop($script:ui.Girl)
+  return [int][Math]::Round($frameTop-$characterTop*$script:displayScale*$dpi)
+}
 function Set-AnimatedValue($target,$property,[double]$value) {
   $target.BeginAnimation($property,$null);$target.SetValue($property,$value)
 }
@@ -539,7 +545,7 @@ $pressMove={param($sender,$event)
   if($dpi-le 0){$dpi=1}
   $w=[int]($script:window.Width*$dpi);$h=[int]($script:window.Height*$dpi)
   $x=[int][Math]::Max($frame.Left,[Math]::Min($frame.Right-$w,$script:drag.left+$dx))
-  $y=[int][Math]::Max($frame.Top,[Math]::Min($frame.Bottom-$h,$script:drag.top+$dy))
+  $y=[int][Math]::Max((Get-WidgetTopLimit $frame.Top $dpi),[Math]::Min($frame.Bottom-$h,$script:drag.top+$dy))
   [GptWidgetNative]::SetWindowPos($script:widgetHandle,[IntPtr]::Zero,$x,$y,$w,$h,0x14)|Out-Null
   $script:lastPosition=$null
   $script:offsetRight=($frame.Right-$x-$w)/$dpi;$script:offsetBottom=($frame.Bottom-$y-$h)/$dpi
@@ -640,7 +646,7 @@ function Tick-Widget {
         $x=[int]($frame.Left+$script:offsetLeft*$dpi)
       }else{$x=[int]($frame.Right-$w-$script:offsetRight*$dpi)}
       $x=[int][Math]::Max($frame.Left,[Math]::Min($frame.Right-$w,$x))
-      $y=[int][Math]::Max($frame.Top,$frame.Bottom-$h-$script:offsetBottom*$dpi)
+      $y=[int][Math]::Max((Get-WidgetTopLimit $frame.Top $dpi),[Math]::Min($frame.Bottom-$h,$frame.Bottom-$h-$script:offsetBottom*$dpi))
       $position="desktop:$x,$y,$w,$h"
       if($position-ne $script:lastPosition){
         [GptWidgetNative]::SetWindowPos($script:widgetHandle,[IntPtr]::Zero,$x,$y,$w,$h,0x14)|Out-Null
