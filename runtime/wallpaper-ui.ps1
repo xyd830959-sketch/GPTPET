@@ -4,8 +4,9 @@
     $state=Get-Content -LiteralPath $file -Raw -Encoding UTF8 | ConvertFrom-Json
     $script:wallpaperEnabled=($state.enabled -eq $true)
     $script:wallpaperSelected=if($state.selected -match '^[a-f0-9]{64}\.(png|jpg|webp)$'){$state.selected}else{$null}
+    $script:wallpaperDimming=if($state.dimming -is [int] -and $state.dimming -ge 20 -and $state.dimming -le 85){[int]$state.dimming}else{60}
   } catch {
-    $script:wallpaperEnabled=$false;$script:wallpaperSelected=$null
+    $script:wallpaperEnabled=$false;$script:wallpaperSelected=$null;$script:wallpaperDimming=60
   }
 }
 
@@ -17,6 +18,11 @@ function Update-WallpaperSettingsMenu {
   $script:settingsMenuUi.WallpaperImport.IsEnabled=!$script:wallpaperBusy
   $script:settingsMenuUi.WallpaperRestore.IsEnabled=!$script:wallpaperBusy
   $script:settingsMenuUi.WallpaperEnable.IsEnabled=!$script:wallpaperBusy
+  if($script:settingsMenuUi.WallpaperDimming){
+    $script:settingsMenuUi.WallpaperDimming.Value=$script:wallpaperDimming
+    $script:settingsMenuUi.WallpaperDimming.IsEnabled=!$script:wallpaperBusy
+    $script:settingsMenuUi.WallpaperDimmingText.Text=$script:wallpaperDimming.ToString()+'%'
+  }
   $script:settingsMenuUi.WallpaperName.Text=if($script:wallpaperSelected){'已选择本地壁纸'}else{'尚未导入壁纸'}
 }
 
@@ -53,6 +59,7 @@ function Invoke-WallpaperAction([string]$Command,[string]$ImagePath='') {
           'disable' {if($result.restored){'壁纸功能已关闭，已恢复默认背景。'}else{'壁纸功能已关闭。当前 Codex 背景未能确认恢复；完全退出 Codex 后按普通方式重启即可清除会话样式。'}}
           'import' {'壁纸已导入。启用功能后可点击“应用壁纸”。'}
           'apply' {'壁纸样式已发送到 Codex 页面。请检查实际显示效果。'}
+          'set-dimming' {if($result.warning){'明暗设置已保存，但当前页面未能更新：'+$result.warning}else{'壁纸明暗已更新。'}}
           'restore' {'已移除本模块注入的壁纸样式。'}
         }
         [Windows.MessageBox]::Show($script:window,$message,'GPT 娘 · Codex 壁纸')|Out-Null
@@ -87,6 +94,18 @@ function Add-WallpaperSettingsMenu {
       } catch {[Windows.MessageBox]::Show($script:window,$_.Exception.Message,'GPT 娘 · Codex 壁纸')|Out-Null}
     } -ReturnItem
     $script:settingsMenuUi.WallpaperApply=Add-SettingsAction '应用壁纸' {Invoke-WallpaperAction 'apply'} -ReturnItem
+    $dimming=New-SettingsSlider '壁纸暗度（越大越暗）' 20 85 5
+    $script:settingsMenuUi.WallpaperDimming=$dimming.Slider;$script:settingsMenuUi.WallpaperDimmingText=$dimming.Value
+    $dimming.Slider.Value=$script:wallpaperDimming
+    $dimming.Slider.Add_ValueChanged({param($sender,$event)$script:settingsMenuUi.WallpaperDimmingText.Text=([Math]::Round($sender.Value)).ToString()+'%'})
+    $saveDimming={
+      if($script:wallpaperBusy){return}
+      $value=[int][Math]::Round($script:settingsMenuUi.WallpaperDimming.Value)
+      if($value -ne $script:wallpaperDimming){Invoke-WallpaperAction 'set-dimming' ([string]$value)}
+    }
+    $dimming.Slider.Add_MouseLeftButtonUp($saveDimming)
+    $dimming.Slider.Add_KeyUp($saveDimming)
+    Add-SettingsPanel $dimming.Panel
     $script:settingsMenuUi.WallpaperRestore=Add-SettingsAction '恢复默认背景' {Invoke-WallpaperAction 'restore'} -ReturnItem
     $script:settingsMenuUi.WallpaperName=New-SettingsText '' 11.5 '#9685A8'
     Add-SettingsPanel $script:settingsMenuUi.WallpaperName -Passive

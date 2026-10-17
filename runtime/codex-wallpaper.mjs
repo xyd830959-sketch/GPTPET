@@ -6,6 +6,11 @@ import { fileURLToPath } from 'node:url';
 const MAX_BYTES = 10 * 1024 * 1024;
 const STYLE_ID = 'gpt-niang-codex-wallpaper-style';
 const ROOT_ATTRIBUTE = 'data-gpt-niang-codex-wallpaper';
+const DEFAULT_DIMMING = 60;
+
+function dimmingValue(value) {
+  return Number.isInteger(value) && value >= 20 && value <= 85 ? value : DEFAULT_DIMMING;
+}
 
 function imageInfo(bytes) {
   let mime, extension, width, height;
@@ -57,9 +62,9 @@ function statePaths(dataDir) {
 function loadState(paths) {
   try {
     const value = JSON.parse(fs.readFileSync(paths.state, 'utf8'));
-    return { enabled: value.enabled === true, selected: typeof value.selected === 'string' ? value.selected : null, port: 9335 };
+    return { enabled: value.enabled === true, selected: typeof value.selected === 'string' ? value.selected : null, dimming: dimmingValue(value.dimming), port: 9335 };
   } catch (error) {
-    if (error.code === 'ENOENT') return { enabled: false, selected: null, port: 9335 };
+    if (error.code === 'ENOENT') return { enabled: false, selected: null, dimming: DEFAULT_DIMMING, port: 9335 };
     throw new Error('壁纸设置无法读取，操作已停止。');
   }
 }
@@ -67,7 +72,7 @@ function loadState(paths) {
 function saveState(paths, state) {
   fs.mkdirSync(paths.root, { recursive: true });
   const temp = `${paths.state}.${process.pid}.${crypto.randomUUID()}.tmp`;
-  fs.writeFileSync(temp, JSON.stringify({ enabled: state.enabled, selected: state.selected }, null, 2), { flag: 'wx' });
+  fs.writeFileSync(temp, JSON.stringify({ enabled: state.enabled, selected: state.selected, dimming: state.dimming }, null, 2), { flag: 'wx' });
   fs.renameSync(temp, paths.state);
 }
 
@@ -133,10 +138,14 @@ async function evaluate(socketUrl, expression) {
   } finally { socket.close(); }
 }
 
-function rendererExpression(action, dataUrl) {
+function rendererExpression(action, dataUrl, dimming) {
+  const alpha = (dimming / 100).toFixed(2);
   const css = action === 'apply' ? `
 html[${ROOT_ATTRIBUTE}="on"] body { background: #17191e url(${JSON.stringify(dataUrl)}) center center / cover fixed no-repeat !important; }
 html[${ROOT_ATTRIBUTE}="on"] #root, html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-page-surface="true"] { background: transparent !important; }
+html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-surface] { background: rgba(14, 15, 20, ${alpha}) !important; }
+html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-surface] [data-app-action-timeline-scroll] [aria-hidden="true"][class~="pointer-events-none"][class~="bottom-0"][class~="bg-surface"],
+html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-surface] [data-app-action-timeline-scroll] [aria-hidden="true"][class~="pointer-events-none"][class~="from-surface"] { background: transparent !important; }
 ` : '';
   return `(() => {
     const id = ${JSON.stringify(STYLE_ID)};
@@ -172,7 +181,7 @@ async function perform(action, paths, state) {
   }
   for (const page of pages) {
     try {
-      const result = await evaluate(page.socket, rendererExpression(action, dataUrl));
+      const result = await evaluate(page.socket, rendererExpression(action, dataUrl, state.dimming));
       if (result === true) success++;
       else if (result === 'dream-skin-active') lastError = new Error('Codex Dream Skin 正在使用中，请先暂停它再应用 GPT 娘壁纸。');
       else if (result === 'unsupported-layout') lastError = new Error('当前 Codex 页面结构暂不支持壁纸。');
@@ -192,6 +201,16 @@ export async function run(command, dataDir, sourcePath, options = {}) {
   }
   if (command === 'status') return { ...state, selectedName: state.selected ? state.selected : null };
   if (command === 'enable') { state.enabled = true; saveState(paths, state); return { enabled: true }; }
+  if (command === 'set-dimming') {
+    const dimming = Number(sourcePath);
+    if (!Number.isInteger(dimming) || dimming < 20 || dimming > 85) throw new Error('壁纸明暗值无效。');
+    state.dimming = dimming; saveState(paths, state);
+    if (state.enabled && state.selected) {
+      try { return { dimming, ...(await perform('apply', paths, state)) }; }
+      catch (error) { return { dimming, warning: error.message }; }
+    }
+    return { dimming };
+  }
   if (command === 'disable') {
     state.enabled = false; saveState(paths, state);
     try { await perform('restore', paths, state); return { enabled: false, restored: true }; }

@@ -18,6 +18,7 @@ $script:wallpaperModuleAvailable=$true
 try {
   Initialize-WidgetSettingsMenu
   if(!$script:settingsMenuUi.Wallpaper){throw 'Codex personalization menu is missing.'}
+  if(!$script:settingsMenuUi.WallpaperDimming -or $script:settingsMenuUi.WallpaperDimming.Value -ne 60){throw 'Wallpaper dimming slider should default to 60%.'}
   if($script:settingsMenuUi.WallpaperEnable.IsChecked){throw 'Wallpaper must be disabled by default.'}
   if($script:settingsMenuUi.WallpaperApply.IsEnabled){throw 'Apply must be disabled without an imported wallpaper.'}
   if(!$script:settingsMenuUi.Audio -or !$script:settingsMenuUi.Appearance){throw 'Existing settings menu items are missing.'}
