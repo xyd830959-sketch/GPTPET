@@ -100,10 +100,18 @@ $enabled=$false
 try {$enabled=(Get-Content -LiteralPath $statePath -Raw -Encoding UTF8 | ConvertFrom-Json).enabled -eq $true} catch {}
 if($enabled){
   $applied=$false
-  $deadline=(Get-Date).AddSeconds(20)
+  $deadline=(Get-Date).AddSeconds(60)
   do {
-    $reply=(& $node $wallpaperModule apply ([string]$config.dataDir) - 2>&1 | Out-String)
-    try {$applied=($reply.Trim() | ConvertFrom-Json).ok -eq $true} catch {$applied=$false}
+    $previousErrorActionPreference=$ErrorActionPreference
+    try {
+      # A page may not exist yet. Native stderr is an ErrorRecord in Windows PowerShell.
+      $ErrorActionPreference='Continue'
+      $reply=(& $node $wallpaperModule apply ([string]$config.dataDir) - 2>$null | Out-String)
+      $applyExitCode=$LASTEXITCODE
+    } finally {
+      $ErrorActionPreference=$previousErrorActionPreference
+    }
+    try {$applied=$applyExitCode -eq 0 -and ($reply.Trim() | ConvertFrom-Json).ok -eq $true} catch {$applied=$false}
     if(!$applied -and (Get-Date) -lt $deadline){Start-Sleep -Milliseconds 700}
   } while(!$applied -and (Get-Date) -lt $deadline)
   if(!$applied){throw 'Codex 已正常启动，但壁纸尚未应用；可在 GPT 娘设置中点“应用壁纸”。'}
