@@ -141,9 +141,17 @@ async function evaluate(socketUrl, expression) {
 function rendererExpression(action, dataUrl, dimming) {
   const alpha = (dimming / 100).toFixed(2);
   const css = action === 'apply' ? `
-html[${ROOT_ATTRIBUTE}="on"] body { background: #17191e url(${JSON.stringify(dataUrl)}) center center / cover fixed no-repeat !important; }
+html[${ROOT_ATTRIBUTE}="on"] body {
+  background-color: #17191e !important;
+  background-image: linear-gradient(rgba(14, 15, 20, ${alpha}), rgba(14, 15, 20, ${alpha})), url(${JSON.stringify(dataUrl)}) !important;
+  background-position: center center !important;
+  background-size: cover !important;
+  background-attachment: fixed !important;
+  background-repeat: no-repeat !important;
+}
 html[${ROOT_ATTRIBUTE}="on"] #root, html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-page-surface="true"] { background: transparent !important; }
-html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-surface] { background: rgba(14, 15, 20, ${alpha}) !important; }
+html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-surface], html[${ROOT_ATTRIBUTE}="on"] [data-sidebar-navigation-root] { background: transparent !important; }
+html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-content-top-fade] > [class*="_MainContentTopFade_"] { background: transparent !important; }
 html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-surface] [data-app-action-timeline-scroll] [aria-hidden="true"][class~="pointer-events-none"][class~="bottom-0"][class~="bg-surface"],
 html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-surface] [data-app-action-timeline-scroll] [aria-hidden="true"][class~="pointer-events-none"][class~="from-surface"] { background: transparent !important; }
 ` : '';

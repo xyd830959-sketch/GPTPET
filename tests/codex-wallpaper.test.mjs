@@ -94,7 +94,9 @@ test('wallpaper import, opt-in, CDP application and restoration stay in isolated
     await run('enable', dataDir);
     assert.equal((await run('apply', dataDir, undefined, { port })).applied, true);
     assert.equal(renderer.nodes.has('gpt-niang-codex-wallpaper-style'), true);
-    assert.match(renderer.nodes.get('gpt-niang-codex-wallpaper-style').textContent, /\[data-app-shell-main-surface\] \{ background: rgba\(14, 15, 20, 0\.60\)/);
+    assert.match(renderer.nodes.get('gpt-niang-codex-wallpaper-style').textContent, /background-image: linear-gradient\(rgba\(14, 15, 20, 0\.60\), rgba\(14, 15, 20, 0\.60\)\), url\(/);
+    assert.match(renderer.nodes.get('gpt-niang-codex-wallpaper-style').textContent, /\[data-app-shell-main-surface\], html\[data-gpt-niang-codex-wallpaper="on"\] \[data-sidebar-navigation-root\] \{ background: transparent !important; \}/);
+    assert.match(renderer.nodes.get('gpt-niang-codex-wallpaper-style').textContent, /\[data-app-shell-main-content-top-fade\] > \[class\*="_MainContentTopFade_"\] \{ background: transparent !important; \}/);
     assert.match(renderer.nodes.get('gpt-niang-codex-wallpaper-style').textContent, /\[data-app-action-timeline-scroll\] \[aria-hidden="true"\]\[class~="pointer-events-none"\]\[class~="bottom-0"\]\[class~="bg-surface"\]/);
     assert.match(renderer.nodes.get('gpt-niang-codex-wallpaper-style').textContent, /\[class~="from-surface"\] \{ background: transparent !important; \}/);
     await assert.rejects(run('set-dimming', dataDir, '100', { port }), /明暗值无效/);
