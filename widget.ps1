@@ -49,6 +49,7 @@ public static class GptWidgetNative {
   [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h,int command);
   [DllImport("user32.dll")] public static extern bool IsWindow(IntPtr h);
   [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+  [DllImport("user32.dll")] public static extern IntPtr GetShellWindow();
   [DllImport("user32.dll")] public static extern IntPtr GetAncestor(IntPtr h,uint f);
   [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h,out Rect r);
   [DllImport("user32.dll")] public static extern bool GetCursorPos(out Point p);
@@ -90,6 +91,15 @@ public static class GptWidgetNative {
   }
   public static int ProcessId(IntPtr h){uint p;GetWindowThreadProcessId(h,out p);return (int)p;}
   public static IntPtr ForegroundHost(IntPtr h){var root=GetAncestor(h,2);return IsCodex(root)?root:IntPtr.Zero;}
+  public static bool IsDesktop(IntPtr h){
+    if(h==IntPtr.Zero)return false;
+    var shell=GetShellWindow();if(h==shell)return true;
+    var cls=new StringBuilder(128);GetClassName(h,cls,128);
+    var name=cls.ToString();if(name!="Progman"&&name!="WorkerW")return false;
+    uint pid;GetWindowThreadProcessId(h,out pid);
+    try{using(var p=Process.GetProcessById((int)pid)){return p.ProcessName.Equals("explorer",StringComparison.OrdinalIgnoreCase);}}
+    catch{return false;}
+  }
   public static string Title(IntPtr h){var b=new StringBuilder(256);GetWindowText(h,b,256);return b.ToString();}
 }
 public sealed class GptOutsideClickWatcher : IDisposable {
@@ -654,10 +664,18 @@ function Tick-Widget {
         if($script:context.IsOpen){Set-WidgetMenuBounds;Position-WidgetMenuToHost}
       }
     }
-    # An unowned topmost window remains independently usable across the desktop.
+    # Follow the foreground app: Codex and the desktop show the widget above
+    # their surface; another app goes in front of it.
     if([GptWidgetNative]::GetWindowLongPtr($script:widgetHandle,-8)-ne [IntPtr]::Zero){[GptWidgetNative]::SetWindowLongPtr($script:widgetHandle,-8,[IntPtr]::Zero)|Out-Null}
-    [GptWidgetNative]::SetWindowPos($script:widgetHandle,[IntPtr](-1),0,0,0,0,0x13)|Out-Null
     [GptWidgetNative]::ShowWindow($script:widgetHandle,4)|Out-Null
+    if($script:foregroundHost-ne [IntPtr]::Zero -or [GptWidgetNative]::IsDesktop($foreground)){
+      [GptWidgetNative]::SetWindowPos($script:widgetHandle,[IntPtr](-1),0,0,0,0,0x13)|Out-Null
+    }elseif(!$script:foregroundOwn -and $foreground-ne [IntPtr]::Zero){
+      [GptWidgetNative]::SetWindowPos($script:widgetHandle,[IntPtr](-2),0,0,0,0,0x13)|Out-Null
+      if(![GptWidgetNative]::IsIconic($foreground) -and !([GptWidgetNative]::GetWindowLongPtr($foreground,-20).ToInt64() -band 8)){
+        [GptWidgetNative]::SetWindowPos($script:widgetHandle,$foreground,0,0,0,0,0x13)|Out-Null
+      }
+    }
   }elseif($script:window.IsVisible){
     $script:hostFollower.Suspend()
     $script:context.IsOpen=$false
