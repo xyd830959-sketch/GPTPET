@@ -152,6 +152,8 @@ html[${ROOT_ATTRIBUTE}="on"] body {
 html[${ROOT_ATTRIBUTE}="on"] #root, html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-page-surface="true"] { background: transparent !important; }
 html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-surface], html[${ROOT_ATTRIBUTE}="on"] [data-sidebar-navigation-root] { background: transparent !important; }
 html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-content-top-fade] > [class*="_MainContentTopFade_"] { background: transparent !important; }
+/* Library and plugin page headers paint an additional surface on ::before. */
+html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-surface] [data-app-shell-inline-page-header] [data-sticky="true"][data-collapsible]::before { background: transparent !important; }
 html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-surface] [data-app-action-timeline-scroll] [aria-hidden="true"][class~="pointer-events-none"][class~="bottom-0"][class~="bg-surface"],
 html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-surface] [data-app-action-timeline-scroll] [aria-hidden="true"][class~="pointer-events-none"][class~="from-surface"] { background: transparent !important; }
 ` : '';
