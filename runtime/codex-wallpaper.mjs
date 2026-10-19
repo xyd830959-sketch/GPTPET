@@ -160,6 +160,8 @@ html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-inline-page-header] > [class~="min-
 html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-surface] [data-app-shell-inline-page-header] [data-sticky="true"]::before { background: transparent !important; }
 html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-surface] [data-app-action-timeline-scroll] [aria-hidden="true"][class~="pointer-events-none"][class~="bottom-0"][class~="bg-surface"],
 html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-surface] [data-app-action-timeline-scroll] [aria-hidden="true"][class~="pointer-events-none"][class~="from-surface"] { background: transparent !important; }
+/* The right side chat tab has its own opaque pane background. */
+html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-compact-page-gutter="false"]:has(> [role="tabpanel"][data-app-shell-tab-panel-controller="right"][data-tab-id^="sidechat:"]) { background: transparent !important; }
 ` : '';
   return `(() => {
     const id = ${JSON.stringify(STYLE_ID)};
