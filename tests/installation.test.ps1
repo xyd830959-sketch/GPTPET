@@ -1,4 +1,4 @@
-$ErrorActionPreference='Stop'
+﻿$ErrorActionPreference='Stop'
 $source=Split-Path $PSScriptRoot -Parent
 . (Join-Path $source 'runtime\supervisor-task.ps1')
 $testRoot=Join-Path ([IO.Path]::GetTempPath()) ('gpt-niang-install-test-'+[Guid]::NewGuid().ToString('N'))
@@ -8,7 +8,8 @@ function Assert($condition,[string]$label){if(!$condition){throw ('Assertion fai
 function Assert-Throws([scriptblock]$action,[string]$pattern,[string]$label){try{& $action|Out-Null}catch{Assert ($_.Exception.Message-like $pattern) $label;return};throw ('Expected rejection: '+$label)}
 try{
   $moved=Join-Path $testRoot 'moved [folder]'
-  Copy-Item -LiteralPath $source -Destination $moved -Recurse
+  $null=New-Item -ItemType Directory -Path $moved
+  Get-ChildItem -LiteralPath $source -Force | Where-Object {$_.Name -notin @('.git','node_modules','work','dist','test-results','verification-data','experiment-data')} | Copy-Item -Destination $moved -Recurse
   $old=Join-Path $testRoot 'original'
   $data=Join-Path $testRoot 'state'
   $null=New-Item -ItemType Directory -Path $data
@@ -45,6 +46,14 @@ try{
   function Get-ScheduledTask {$global:widgetInstallerTestTasks}
   $global:widgetInstallerTestTasks=@()
   function Get-CimInstance {return $null}
+  # CheckOnly must not depend on the developer's actual Codex installation.
+  $global:gptpetInstallerCodex=Join-Path $testRoot 'codex-stub.cmd'
+  [IO.File]::WriteAllText($global:gptpetInstallerCodex,"@exit /b 0`r`n",[Text.UTF8Encoding]::new($false))
+  function Get-Command {
+    [CmdletBinding()]param([Parameter(Position=0)][string]$Name)
+    if($Name -eq 'codex.exe'){return [pscustomobject]@{Source=$global:gptpetInstallerCodex}}
+    Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+  }
   $configFile=Join-Path $moved 'installation.json'
   $previous=@{appDir=$old;dataDir=$data}
   Write-WidgetSupervisorJson $configFile $previous

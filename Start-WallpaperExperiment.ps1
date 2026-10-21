@@ -1,5 +1,5 @@
 ﻿param(
-  [string]$InstalledConfig='C:\Users\user\AppData\Local\Programs\GPTNiangUsage\gpt-niang-usage\installation.json',
+  [string]$InstalledConfig=(Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'Programs\GPTNiangUsage\gpt-niang-usage\installation.json'),
   [switch]$CheckOnly
 )
 $ErrorActionPreference='Stop'

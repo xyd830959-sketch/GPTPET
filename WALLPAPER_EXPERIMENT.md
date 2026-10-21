@@ -33,7 +33,7 @@
 
 实机测试将项目现有 `assets/gpt-dragon-niang-bust.png` 导入独立测试目录：Codex 主页面 1/1 应用成功，`body` 的计算背景包含该 PNG，`#root` 和页面表面透明；恢复后本模块样式和标记均消失，开关最终关闭。测试没有改动正式 GPT 娘数据或 Codex 安装文件。正式运行目录与原源码目录在此前测试后和 50 文件备份逐项比较，哈希差异为 0。
 
-本次测试结束后再次核对：正式目录和原源码的 50 个备份文件差异仍为 0，Codex 页面没有残留本模块样式。用户选择让 Codex Dream Skin 继续保持暂停；其 `C:\Users\user\AppData\Local\CodexDreamSkin\paused` 标记仍在，未获用户同意前不删除。现有 Codex 会话的 9335 调试端口仍会开放，直到完全退出客户端并按普通方式重启。
+本次测试结束后再次核对：正式目录和原源码的 50 个备份文件差异仍为 0，Codex 页面没有残留本模块样式。用户选择让 Codex Dream Skin 继续保持暂停；其 `%USERPROFILE%\AppData\Local\CodexDreamSkin\paused` 标记仍在，未获用户同意前不删除。现有 Codex 会话的 9335 调试端口仍会开放，直到完全退出客户端并按普通方式重启。
 
 用户试用时发现壁纸只在侧边可见，中央仍是黑色。检查定位到 `[data-app-shell-main-surface]` 的不透明背景，第一次修正为 42% 遮罩后，用户截图显示聊天文字背后太亮、输入区背后出现黑块。进一步检查发现聊天滚动区另有不透明底色和渐变。现已把中央默认遮罩调至 60%，增加 20%～85% 的设置滑块，并仅移除聊天滚动区的底色和渐变。重新应用后的实机截图显示底部黑块消失，中央壁纸可见；最终明暗仍以用户试用感受为准。该次修正通过 35/35 Node 测试和完整 Windows 测试。
 
@@ -60,7 +60,7 @@
 ## 回退
 
 1. 关闭实验挂件；如果壁纸仍在 Codex 中显示，点击“恢复默认背景”，或完全退出 Codex 后从普通官方入口重启。
-2. 继续使用原正式版运行目录 `C:\Users\user\AppData\Local\Programs\GPTNiangUsage\gpt-niang-usage`。实验版没有改动它。
+2. 继续使用原正式版运行目录 `%USERPROFILE%\AppData\Local\Programs\GPTNiangUsage\gpt-niang-usage`。实验版没有改动它。
 3. 保留 `backup`、`stable-repo` 和 `experiment` 以便审查。若以后要移除实验 worktree，先列出拟删除的完整路径、文件数量和影响，取得用户确认后再操作；不要对稳定版执行 `git reset --hard` 或删除个人数据。
 
 ## GitHub 保存状态

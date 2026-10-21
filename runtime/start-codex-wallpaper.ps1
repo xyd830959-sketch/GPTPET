@@ -1,5 +1,6 @@
 ﻿param(
   [switch]$CheckOnly,
+  [switch]$ImportLegacyProfile,
   [string]$ConfigurationPath=(Join-Path (Split-Path $PSScriptRoot -Parent) 'installation.json')
 )
 $ErrorActionPreference='Stop'
@@ -53,6 +54,7 @@ if($CheckOnly){
     ok=$true;codexExe=$codexExe;codexVersion=[string]$package.Version
     profile=$profile;profileReady=(Test-Path -LiteralPath $marker -PathType Leaf)
     legacyProfileAvailable=(Test-Path -LiteralPath $legacy -PathType Container)
+    legacyImportRequested=[bool]$ImportLegacyProfile
     codexRunning=($running.Count -gt 0);portBusy=$portBusy
   } | ConvertTo-Json
   return
@@ -64,7 +66,7 @@ if(!(Test-Path -LiteralPath $marker -PathType Leaf)){
   if(Test-Path -LiteralPath $profile){throw '壁纸专用配置目录存在但未完成迁移；已保留原文件，请先检查。'}
   if(Test-Path -LiteralPath $staging){throw '上次配置迁移未完成；已保留临时副本，请先检查。'}
   $null=New-Item -ItemType Directory -Path $staging -Force
-  if(Test-Path -LiteralPath $legacy -PathType Container){
+  if($ImportLegacyProfile -and (Test-Path -LiteralPath $legacy -PathType Container)){
     $links=@(Get-ChildItem -LiteralPath $legacy -Force -Recurse -ErrorAction Stop | Where-Object {($_.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0})
     if($links.Count){throw '旧 Codex 配置含目录链接，已停止迁移。'}
     Get-ChildItem -LiteralPath $legacy -Force -ErrorAction Stop |
@@ -72,7 +74,7 @@ if(!(Test-Path -LiteralPath $marker -PathType Leaf)){
       Copy-Item -Destination $staging -Recurse -Force -ErrorAction Stop
   }
   [IO.File]::WriteAllText((Join-Path $staging 'gpt-niang-profile-ready.json'),
-    (@{createdAt=[DateTime]::UtcNow.ToString('o');source=if(Test-Path -LiteralPath $legacy){'legacy-cdp-profile'}else{'new-profile'}} | ConvertTo-Json),
+    (@{createdAt=[DateTime]::UtcNow.ToString('o');source=if($ImportLegacyProfile -and (Test-Path -LiteralPath $legacy)){'legacy-cdp-profile'}else{'new-profile'}} | ConvertTo-Json),
     [Text.UTF8Encoding]::new($false))
   [IO.Directory]::Move($staging,$profile)
 }

@@ -1,0 +1,33 @@
+name: Repository checks and Windows tests
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    env:
+      GPTPET_TEST_ROOT: ${{ runner.temp }}\gptpet-tests
+      GPTPET_ALLOW_TEST_CLEANUP: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Validate repository
+        run: npm run check
+      - name: Run isolated suites
+        run: npm test
+      - name: Retain synthetic test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-evidence-node-${{ matrix.node }}
+          path: ${{ runner.temp }}\gptpet-tests
+          if-no-files-found: warn

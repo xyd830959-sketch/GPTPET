@@ -7,7 +7,8 @@ import crypto from 'node:crypto';
 import vm from 'node:vm';
 import { run } from '../runtime/codex-wallpaper.mjs';
 
-const outputRoot = path.resolve(import.meta.dirname, '..', '..', 'verification-data');
+if (!process.env.GPTPET_TEST_ROOT) throw new Error('Use scripts/run-tests.mjs to isolate generated data.');
+const outputRoot = path.resolve(process.env.GPTPET_TEST_ROOT, 'wallpaper');
 fs.mkdirSync(outputRoot, { recursive: true });
 const dataDir = fs.mkdtempSync(path.join(outputRoot, 'wallpaper-'));
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRbkAAAAASUVORK5CYII=', 'base64');

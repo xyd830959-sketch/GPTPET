@@ -1,7 +1,8 @@
-$ErrorActionPreference='Stop'
+﻿$ErrorActionPreference='Stop'
 Add-Type -AssemblyName PresentationFramework,PresentationCore,WindowsBase
 $script:appDir=Split-Path $PSScriptRoot -Parent
-$script:dataDir=Join-Path (Split-Path $script:appDir -Parent) 'verification-data\ui-menu'
+if(!$env:GPTPET_TEST_ROOT){throw 'An isolated test root is required.'}
+$script:dataDir=Join-Path $env:GPTPET_TEST_ROOT 'ui-menu'
 $script:window=New-Object Windows.Window
 $script:collapsed=$true
 $script:bubbleMode='quota'

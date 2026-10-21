@@ -1,28 +1,48 @@
-# GPT娘额度挂件
+# GPTPET
 
-这是 GPT 娘额度挂件的源码目录。Windows 挂件随 Codex 主窗口显示额度、语录，并在设置菜单提供可选的 Codex 壁纸功能。
+GPTPET 是 [GPT-Niang](https://github.com/T7moris/GPT-Niang) **v1.2.5 的 Windows 衍生版本**，由 [xyd830959-sketch](https://github.com/xyd830959-sketch) 维护。继承上游的 Codex 额度与语录挂件，增加可选的本地壁纸功能。它不是 OpenAI 官方项目，也不提供或增加订阅额度。
 
-- `Install.ps1`：检查依赖并安装；`-CheckOnly` 只检查，不修改系统。
-- `widget.ps1` / `widget.xaml`：Windows WPF 挂件与界面。
-- `runtime/mcp.mjs`：只读额度查询工具。
-- `runtime/supervisor.ps1`：识别主窗口并自动恢复角色。
-- `runtime/host-layer.ps1`：主窗口归属与遮挡顺序。
-- `runtime/codex-wallpaper.mjs` / `runtime/wallpaper-ui.ps1`：本地壁纸导入、应用、暗度调整和恢复默认背景。
-- `assets/quotes.json`：内置中文语录。
-- `tests/`：额度、刷新队列、挂件及壁纸测试。
+当前源码版本：`1.2.5-gptpet.1`（候选版本，尚未发布）。原项目作者和贡献者的版权保留；角色图片不属于代码的 MIT 授权范围。[来源与许可](THIRD_PARTY_NOTICES.md)
 
-`installation.json` 在本机安装时生成，不包含在仓库中。默认个人数据位于 `%LOCALAPPDATA%\GPTNiangUsage\state`，停用后保留。
+## 功能与贡献范围
 
-额度气泡在原有尺寸内显示剩余百分比、进度条和重置时间。展开动画结束后，前 2 秒显示距离重置多久，后 3 秒显示固定日期和重置时刻，然后自动收起；再次点击角色或刷新时重新计时。重置时刻、今日／明日及更新时间均按当前 Windows 机器的本地时间显示；悬停气泡可查看完整日期、时区偏移与倒计时。缺少重置时间时会明确提示，过期的额度等待刷新。
+| 来源 | 内容 |
+| --- | --- |
+| 继承 GPT-Niang v1.2.5 | PowerShell/WPF 额度与语录挂件、Node.js 只读额度 worker、窗口跟随与安装生命周期 |
+| GPTPET 后续改动 | PNG/JPG/WebP 壁纸导入、20%—85% 暗度调节、应用与恢复、独立启动器和加载重试、部分页面背景兼容与相关测试 |
 
-交互实现范围见[DSH功能对照](DSH功能对照.md)，图片生成来源见[素材说明](assets/生成说明.md)。
+壁纸初始关闭。它使用本机调试连接修改当前 Codex 页面的样式；客户端更新可能使它失效。没有动态壁纸、轮换或跨设备同步。源码和基线提交见 [PROVENANCE](docs/PROVENANCE.md)，版本记录见 [CHANGELOG](CHANGELOG.md)。
 
-## Codex 壁纸
+## 运行条件
 
-在挂件上右键打开设置，进入“Codex 个性化”。导入 PNG、JPG 或 WebP 图片后，打开“启用壁纸功能”，点击“应用壁纸”。可以用“壁纸暗度”滑块调节明暗；“恢复默认背景”移除本模块在当前页面注入的样式。新安装时壁纸开关默认关闭，壁纸状态单独保存在 `%LOCALAPPDATA%\GPTNiangUsage\state\codex-wallpaper`。
+- Windows 10/11、Windows PowerShell 5.1、WPF 和 Windows Script Host。
+- Node.js **22 或更新版本**；壁纸模块依赖内置 WebSocket。本项目不安装 npm 依赖。
+- 已安装并用本人 ChatGPT 账号登录的 Codex 桌面客户端。安装器需要能找到其 `codex.exe`；独立壁纸启动器当前只支持 `OpenAI.Codex` Store 安装。
+- 仅包含 Windows 实现；不继承上游后续版本的 macOS 支持或新套餐适配承诺。[兼容范围](docs/COMPATIBILITY.md)
 
-壁纸应用需要 Codex 当前会话开放本机调试连接 `127.0.0.1:9335`。如果连接不可用，挂件的原有额度功能继续工作。此功能不修改 Codex 官方安装文件或核心配置；关闭 Codex 会话后，注入样式也会消失。Codex 更新可能影响页面兼容性，且目前没有自动重涂、轮换或动态壁纸功能。
+## 从源码使用
 
-不使用 Dream Skin 时，先完全退出 Codex，再从桌面或开始菜单打开“Codex 壁纸模式（GPT 娘）”。该快捷方式通过 `open-codex-wallpaper-hidden.vbs` 无窗口启动，不会显示 CMD；如果启动失败，可运行 `打开Codex壁纸模式.cmd` 查看错误。启动器只定位已安装的官方 Codex 应用，使用独立的 `%LOCALAPPDATA%\GPTNiangUsage\codex-wallpaper-profile`，并在 Codex 页面就绪后自动应用已启用的 GPT 娘壁纸。首次使用时，如果电脑上有旧的 Dream Skin Codex 配置，启动器会在 Codex 完全关闭后复制到新目录；原目录不会被移动或删除。普通官方入口仍可启动 Codex，但不会开放壁纸所需的调试连接。
+1. 将完整源码保存在长期使用的目录。保留隐藏的 `.agents`、`.codex-plugin` 和 `.mcp.json`。
+2. 先安装 Node.js 并打开 Codex。运行 `powershell.exe -NoProfile -File .\Install.ps1 -CheckOnly`，检查文件、安装身份和依赖。检查不会安装插件或注册启动项。
+3. 阅读 [安装影响和退出方法](docs/INSTALLATION.md)，确认愿意更改本机插件登记、启动项和用户计划任务后，再运行 `安装GPT娘.cmd`。
+4. 挂件中点击角色查看额度，点击气泡切换语录，右键打开设置。
 
-原[实验记录](WALLPAPER_EXPERIMENT.md)保留了开发和实机验证过程。运行 `node --test tests/*.test.mjs` 可执行 Node 测试，运行 `powershell.exe -NoProfile -STA -ExecutionPolicy Bypass -File tests/run-windows-tests.ps1` 可执行 Windows 挂件测试。
+安装器使用本仓库自带的本地 marketplace。插件技术标识仍为 `gpt-niang-usage@gpt-niang-local`，用于兼容既有安装；显示名称和维护者信息已区分 GPTPET 与上游。若已有其他目录的原版安装，先按文档处理，不能直接覆盖其注册。
+
+## 可选壁纸
+
+在右键设置的“Codex 个性化”中导入本人有权使用的图片、启用壁纸并调节暗度。需要 `127.0.0.1:9335` 上的 Codex 调试会话。通过 `打开Codex壁纸模式.cmd` 或安装后的对应快捷方式启动；启动器不会强制关闭正在使用的客户端。
+
+调试端口没有身份认证，同一电脑上的其他进程可能访问。关闭壁纸开关仅尝试恢复样式；要结束调试会话，完全退出 Codex，再从普通官方入口重新启动。默认新建独立配置目录，不自动复制其他软件的登录配置。[完整安全说明](SECURITY.md)
+
+## 开发、测试与反馈
+
+先运行 `npm run check`。自动测试会创建并清理合成测试数据，运行前须明确选择专用目录并同意该范围的清理；操作方式、测试分层及实机验收见 [DEVELOPMENT](docs/DEVELOPMENT.md)。自动测试通过不等于全部桌面交互已通过实机验证。 本轮实际结果见 [本地验证记录](docs/VALIDATION.md)。
+
+通过 [GitHub Issues](https://github.com/xyd830959-sketch/GPTPET/issues) 提供脱敏的版本、复现步骤和预期结果；仓库仍为私有时，仅有访问权限的人员可提交或阅读。贡献规则见 [CONTRIBUTING](CONTRIBUTING.md)。请勿上传账号文件、聊天、完整配置或私人壁纸。
+
+## 许可
+
+代码与一般文档沿用 [MIT License](LICENSE)，保留原版权行。角色图片、派生图标及第三方参考权利另行处理，不能视作 MIT 商用授权；当前附带图片限于权利人允许的用途。[第三方与素材说明](THIRD_PARTY_NOTICES.md)
+
+当前没有经核实的外部用户数、下载量或生态影响力数据；上游的 stars、forks 和用户不属于 GPTPET 的指标。

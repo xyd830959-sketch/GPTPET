@@ -12,10 +12,10 @@ if(Test-Path -LiteralPath $previousConfig){
   $dataDir=Get-WidgetInstallationDataDir -AppDir $appDir -Configuration $previous
 }
 $nodeCommand=Get-Command node.exe -ErrorAction SilentlyContinue
-if(!$nodeCommand){throw 'Node.js 20 or later is required. Install Node.js and reopen the installer.'}
+if(!$nodeCommand){throw 'Node.js 22 or later is required. Install Node.js and reopen the installer.'}
 $node=$nodeCommand.Source
 $nodeMajor=[int]((& $node --version).TrimStart('v').Split('.')[0])
-if($nodeMajor-lt 20){throw 'Node.js 20 or later is required.'}
+if($nodeMajor-lt 22){throw 'Node.js 22 or later is required.'}
 $codexCommand=Get-Command codex.exe -ErrorAction SilentlyContinue
 $codex=if($codexCommand){$codexCommand.Source}else{$null}
 if(!$codex){
@@ -23,7 +23,7 @@ if(!$codex){
   if(Test-Path -LiteralPath $bundled){$codex=(Get-ChildItem -LiteralPath $bundled -Filter codex.exe -File -Recurse|Sort-Object LastWriteTimeUtc -Descending|Select-Object -First 1).FullName}
 }
 if(!$codex){throw 'Codex executable unavailable. Install and open the Codex desktop app first.'}
-$marketplaceRoot=Split-Path $appDir -Parent
+$marketplaceRoot=if(Test-Path -LiteralPath (Join-Path $appDir '.agents\plugins\marketplace.json')){$appDir}else{Split-Path $appDir -Parent}
 foreach($file in @('widget.ps1','widget.xaml','launch.vbs','open-codex-wallpaper-hidden.vbs','supervisor.vbs','打开Codex壁纸模式.cmd','assets\gpt-dragon-niang-bust.png','assets\quotes.json','assets\quote-layouts.json','assets\press.wav','assets\release.wav','runtime\quotes.ps1','runtime\ui-settings.ps1','runtime\wallpaper-ui.ps1','runtime\codex-wallpaper.mjs','runtime\start-codex-wallpaper.ps1','runtime\color-theme.ps1','runtime\quote-layout.ps1','runtime\audio.ps1','runtime\host-layer.ps1','runtime\host-follow.ps1','runtime\supervisor.ps1','runtime\supervisor-task.ps1','runtime\start-supervisor.ps1','runtime\start-widget.ps1','runtime\metadata.mjs','runtime\mcp.mjs','runtime\usage.mjs','runtime\watch.mjs','runtime\control.mjs','runtime\refresh-queue.mjs','runtime\refresh-client.mjs','runtime\worker-state.mjs','.mcp.json','.codex-plugin\plugin.json')){
   if(!(Test-Path -LiteralPath (Join-Path $appDir $file))){throw "Missing file: $file"}
 }

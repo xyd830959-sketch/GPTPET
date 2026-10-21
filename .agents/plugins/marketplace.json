@@ -1,0 +1,20 @@
+{
+  "name": "gpt-niang-local",
+  "interface": {
+    "displayName": "GPTPET local marketplace"
+  },
+  "plugins": [
+    {
+      "name": "gpt-niang-usage",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
