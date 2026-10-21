@@ -13,7 +13,6 @@ jobs:
       matrix:
         node: [22, 24]
     env:
-      GPTPET_TEST_ROOT: ${{ runner.temp }}\gptpet-tests
       GPTPET_ALLOW_TEST_CLEANUP: '1'
     steps:
       - uses: actions/checkout@v4
@@ -23,6 +22,8 @@ jobs:
       - name: Validate repository
         run: npm run check
       - name: Run isolated suites
+        env:
+          GPTPET_TEST_ROOT: ${{ runner.temp }}\gptpet-tests
         run: npm test
       - name: Retain synthetic test evidence
         if: always()
