@@ -4,6 +4,12 @@ GPTPET 是 [GPT-Niang](https://github.com/T7moris/GPT-Niang) **v1.2.5 的 Window
 
 当前源码版本：`1.2.5-gptpet.1`（候选版本，尚未发布）。原项目作者和贡献者的版权保留；角色图片不属于代码的 MIT 授权范围。[来源与许可](THIRD_PARTY_NOTICES.md)
 
+## 来源、许可与审阅范围
+
+原 GPTPET 仓库现已公开。本版本在提交 `bd4a972d5ff9fce4db3936ca188e7f87de5db5ed` 的工程准备基础上，整合保留龙娘的来源与素材说明；原开发历史保留，不伪装为全新原创。此前另行导出的本地源码快照不携带 `.git`，这与本仓库保留历史是两回事。[候选导出与整合来源](docs/CANDIDATE_ORIGIN.md)
+
+本版本按用户选择保留龙娘图片，图片字节及上游声明均未改变。**代码与一般文档为 MIT；龙娘图片及派生图标不适用 MIT**，须遵守随附的单独声明和第三方权利边界。不得把整个含图副本描述为全部素材均可按 MIT 自由商用。[逐项素材范围](docs/ASSET_SCOPE.md)
+
 ## 功能与贡献范围
 
 | 来源 | 内容 |
@@ -37,9 +43,9 @@ GPTPET 是 [GPT-Niang](https://github.com/T7moris/GPT-Niang) **v1.2.5 的 Window
 
 ## 开发、测试与反馈
 
-先运行 `npm run check`。自动测试会创建并清理合成测试数据，运行前须明确选择专用目录并同意该范围的清理；操作方式、测试分层及实机验收见 [DEVELOPMENT](docs/DEVELOPMENT.md)。自动测试通过不等于全部桌面交互已通过实机验证。 本轮实际结果见 [本地验证记录](docs/VALIDATION.md)。
+先运行 `npm run check`。自动测试会创建并清理合成测试数据，运行前须明确选择专用目录并同意该范围的清理；操作方式、测试分层及实机验收见 [DEVELOPMENT](docs/DEVELOPMENT.md)。自动测试通过不等于全部桌面交互已通过实机验证。 基准提交的已验证结果及本地候选的验证边界见 [验证记录](docs/VALIDATION.md)。
 
-通过 [GitHub Issues](https://github.com/xyd830959-sketch/GPTPET/issues) 提供脱敏的版本、复现步骤和预期结果；仓库仍为私有时，仅有访问权限的人员可提交或阅读。贡献规则见 [CONTRIBUTING](CONTRIBUTING.md)。请勿上传账号文件、聊天、完整配置或私人壁纸。
+通过 [GitHub Issues](https://github.com/xyd830959-sketch/GPTPET/issues) 提供脱敏的版本、复现步骤和预期结果；仓库已公开；反馈和贡献可通过公开页面进行。贡献规则见 [CONTRIBUTING](CONTRIBUTING.md)。请勿上传账号文件、聊天、完整配置或私人壁纸。
 
 ## 许可
 

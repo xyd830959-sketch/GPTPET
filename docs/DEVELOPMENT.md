@@ -2,6 +2,10 @@
 
 使用 Node.js 22+、Git 和 Windows PowerShell 5.1。无 npm 依赖，不需要 API key。保留旧版权、用户配置路径和插件身份；修改安装生命周期前先阅读安装文档。
 
+## 仓库根目录与导出快照
+
+本 Git 仓库保留原提交历史。先用 `git rev-parse --show-toplevel` 核对根目录，再运行历史检查。此前独立导出的源码快照不携带 `.git`，若从源码归档使用，不要把父目录的其他仓库扫描结果当成本项目历史。来源摘要见 [CANDIDATE_ORIGIN](CANDIDATE_ORIGIN.md)。
+
 ## 静态检查
 
 `npm run check` 验证元数据、来源文档、内部链接及当前发布文件中的常见敏感信息模式。`npm run check:history` 额外扫描本地 Git 对象，并只报告路径、对象号和问题类型，不打印疑似密钥内容。扫描不是无泄漏保证，首次公开前还需人工检查历史、图片及归档。

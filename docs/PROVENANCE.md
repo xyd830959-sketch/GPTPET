@@ -5,7 +5,7 @@
 | 项目 | 证据 |
 | --- | --- |
 | 上游 | https://github.com/T7moris/GPT-Niang ，v1.2.5 |
-| 衍生仓库 | https://github.com/xyd830959-sketch/GPTPET ，本次准备时用户说明为私有 |
+| 衍生仓库 | https://github.com/xyd830959-sketch/GPTPET ，原仓库现已公开；本地候选导出时为私有 |
 | 维护者 | xyd830959-sketch；上游作者仍为 T7moris 及贡献者 |
 | 导入基线 | b28dc238692cb7ea80c219ee4f3b3668ea3c613c |
 | 改造前本地 HEAD | 50d4ac03507f3958060ae01596120c9db0f499e5 |
@@ -14,6 +14,6 @@
 
 代表性改动：ee9a75c（壁纸实验）、6b7c872 / 3dd6c54（暗度）、e520372 / 17a71d3 / b1bd48a（启动与重试）、718e80e / 55cecbb / 50d4ac0（页面兼容）。本地旧作者字段为 Codex local baseline / experiment / update，不伪造为与 GitHub 已验证身份直接绑定的提交。
 
-未来提交使用贡献者本人确认的 Git 身份；不为申请重写历史、虚构维护日期或抹去上游署名。本次工作区修改在完成提交前不计为新提交。
+未来提交使用贡献者本人确认的 Git 身份；不为申请重写历史、虚构维护日期或抹去上游署名。未提交的候选文档修改不计为既有 Git 提交。本地候选导出自已验证的 `bd4a972d`；完整来源与导出边界见 [CANDIDATE_ORIGIN](CANDIDATE_ORIGIN.md)。此次文档整合保留原提交链；原仓库公开不会产生新的原创贡献或外部采用证据。
 
 上游当前版本可能具有更多平台和功能，本仓库不因此获得这些实现或维护记录。没有经核实的 GPTPET 外部用户量，不能沿用上游的 stars、forks、下载量、PR 或用户反馈。
