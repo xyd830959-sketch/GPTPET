@@ -7,6 +7,8 @@ function ConvertTo-WidgetQuoteRows($Value) {
   if($null-eq $Value){return}
   if($Value -isnot [string] -and $Value.PSObject.Properties['quotes']){$Value=$Value.quotes}
   $rows=New-Object 'System.Collections.Generic.List[object]'
+  # Retain first-seen order while looking up duplicates with ordinal equality.
+  $byText=[Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
   foreach($entry in @($Value)){
     $text=$null;$weight=1.0
     if($entry -is [string]){$text=$entry}
@@ -21,10 +23,13 @@ function ConvertTo-WidgetQuoteRows($Value) {
     $text=$text.Trim()
     if(!$text -or $text.Length-gt 200 -or $text-match '[\x00-\x08\x0B\x0C\x0E-\x1F]'){continue}
     if([double]::IsNaN($weight) -or [double]::IsInfinity($weight) -or $weight-le 0 -or $weight-gt 1000){continue}
-    $duplicate=$null
-    foreach($row in $rows){if([string]::Equals($row.text,$text,[StringComparison]::Ordinal)){$duplicate=$row;break}}
-    if($duplicate){$duplicate.weight=[Math]::Min(1000.0,$duplicate.weight+$weight)}
-    else{$rows.Add([pscustomobject]@{text=$text;weight=$weight})}
+    if($byText.ContainsKey($text)){
+      $duplicate=$byText[$text]
+      $duplicate.weight=[Math]::Min(1000.0,$duplicate.weight+$weight)
+    }else{
+      $row=[pscustomobject]@{text=$text;weight=$weight}
+      $byText.Add($text,$row);$rows.Add($row)
+    }
   }
   foreach($row in $rows){$row}
 }

@@ -21,8 +21,10 @@ foreach($file in ($files|Sort-Object FullName -Unique)){
   $relativeFiles+=@{path=$relative;bytes=$file.Length;sha256=(Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant();full=$file.FullName}
 }
 $null=New-Item -ItemType Directory -Path $output -Force
-$archive=Join-Path $output ('GPTPET-'+$manifest.version+'-source-candidate.zip')
-if(Test-Path -LiteralPath $archive){throw 'Candidate already exists; choose a new output directory. Nothing was overwritten.'}
+$isPrerelease=$manifest.version.Contains('-')
+$suffix=if($isPrerelease){'-source-candidate.zip'}else{'-source.zip'}
+$archive=Join-Path $output ('GPTPET-'+$manifest.version+$suffix)
+if(Test-Path -LiteralPath $archive){throw 'Package already exists; choose a new output directory. Nothing was overwritten.'}
 Add-Type -AssemblyName System.IO.Compression
 $stream=[IO.File]::Open($archive,[IO.FileMode]::CreateNew)
 try{
@@ -36,9 +38,10 @@ try{
   }finally{$zip.Dispose()}
 }finally{$stream.Dispose()}
 $packageFiles=@($relativeFiles|ForEach-Object {@{path=$_.path;bytes=$_.bytes;sha256=$_.sha256}})
-$details=@{version=$manifest.version;status='unpublished-source-candidate';files=$packageFiles;assetScope='MIT code; inherited character assets have separate restrictions. See THIRD_PARTY_NOTICES.md.'}
+$status=if($isPrerelease){'unpublished-source-candidate'}else{'prepared-source-release'}
+$details=@{version=$manifest.version;status=$status;files=$packageFiles;assetScope='MIT code; inherited character assets have separate restrictions. See THIRD_PARTY_NOTICES.md.'}
 [IO.File]::WriteAllText((Join-Path $output 'package-manifest.json'),($details|ConvertTo-Json -Depth 6),[Text.UTF8Encoding]::new($false))
 $hash=(Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
 [IO.File]::WriteAllText((Join-Path $output 'SHA256SUMS.txt'),($hash+'  '+[IO.Path]::GetFileName($archive)+"`n"),[Text.UTF8Encoding]::new($false))
-Write-Output ('Unpublished candidate: '+$archive)
+Write-Output ('Prepared source package: '+$archive)
 Write-Output ('Files: '+$packageFiles.Count)

@@ -27,8 +27,10 @@ try{
   $resolved=[IO.Path]::GetFullPath($testRoot)
   $prefix=[IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd('\')+'\'
   if(!$resolved.StartsWith($prefix,[StringComparison]::OrdinalIgnoreCase) -or [IO.Path]::GetFileName($resolved)-notlike 'gpt-niang-entrypoint-*'){throw 'Unsafe entrypoint test cleanup path.'}
+  if($env:GPTPET_KEEP_TEST_FIXTURES -ne '1'){
   foreach($file in ($files+@('installation.json','preview.png'))){$target=Join-Path $testApp $file;if(Test-Path -LiteralPath $target){Remove-Item -LiteralPath $target}}
   $statusFile=Join-Path $testData 'status.json';if(Test-Path -LiteralPath $statusFile){Remove-Item -LiteralPath $statusFile}
   [Array]::Reverse($directories)
   foreach($directory in $directories){if(Test-Path -LiteralPath $directory){Remove-Item -LiteralPath $directory}}
+  }
 }

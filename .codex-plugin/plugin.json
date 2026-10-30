@@ -1,6 +1,6 @@
 {
   "name": "gpt-niang-usage",
-  "version": "1.2.5-gptpet.1",
+  "version": "1.2.6",
   "description": "GPTPET：基于 GPT-Niang v1.2.5 的 Windows 额度挂件与可选本地壁纸扩展。",
   "mcpServers": "./.mcp.json",
   "interface": {

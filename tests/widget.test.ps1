@@ -4,6 +4,7 @@ Add-Type -AssemblyName PresentationFramework,PresentationCore,WindowsBase
 $appDir=Split-Path $TestRoot -Parent
 . ([ScriptBlock]::Create([IO.File]::ReadAllText((Join-Path $appDir 'runtime\quote-layout.ps1'),[Text.Encoding]::UTF8)))
 Initialize-WidgetQuoteLayouts $appDir
+. ([ScriptBlock]::Create([IO.File]::ReadAllText((Join-Path $appDir 'runtime\color-theme.ps1'),[Text.Encoding]::UTF8)))
 $tokens=$null;$parseErrors=$null
 $source=[IO.File]::ReadAllText((Join-Path $appDir 'widget.ps1'),[Text.Encoding]::UTF8)
 $ast=[Management.Automation.Language.Parser]::ParseInput($source,[ref]$tokens,[ref]$parseErrors)
@@ -229,15 +230,63 @@ try{
     Assert-QuotaLayout
   }
 
-  Remove-Item -LiteralPath (Join-Path $script:dataDir 'status.json')
+  # A local snapshot read failure must discard the old account's display and
+  # reset the timestamp so the same file can be retried after recovery.
+  $snapshotPath=Join-Path $script:dataDir 'status.json'
+  Set-Snapshot @{ok=$true;queryOk=$true;observedAt=$now;windows=@($short,$week)}
+  [IO.File]::WriteAllText($snapshotPath,'broken',[Text.UTF8Encoding]::new($false))
+  [IO.File]::SetLastWriteTimeUtc($snapshotPath,[DateTime]::UtcNow.AddSeconds(1))
+  $failedStamp=[IO.File]::GetLastWriteTimeUtc($snapshotPath)
+  Update-Quota
+  Assert-Equal $script:status $null 'Malformed snapshot discards previous account'
+  Assert-Equal $script:statusStamp 0 'Malformed snapshot remains retryable'
+  foreach($prefix in @('Short','Week')){
+    Assert-Equal $script:ui[$prefix+'Left'].Text '—' 'Malformed snapshot clears percentage'
+    Assert-Equal $script:ui[$prefix+'Bar'].Width 0 'Malformed snapshot clears remaining bar'
+    Assert-Equal $script:ui[$prefix+'Reset'].Text '额度读取异常' 'Malformed snapshot has an explicit error'
+    Assert-Equal $script:ui[$prefix+'Reset'].ToolTip $null 'Malformed snapshot clears reset tooltip'
+  }
+  Assert-Equal $script:ui.Header.Text '暂无法读取' 'Malformed snapshot is not shown as loading or live'
+  Assert-Equal $script:ui.Status.Text '额度快照读取失败 · 点击 ↻ 重试' 'Malformed snapshot explains retry'
+  if($script:bubbleTooltipText.Text.Contains('75%') -or $script:bubbleTooltipText.Text.Contains('90%')){throw 'Old quota leaked into the error tooltip'}
+  Write-Output 'PASS: malformed snapshot clears previous quota and shows a retry prompt'
+
+  [IO.File]::WriteAllText($snapshotPath,(@{ok=$true;queryOk=$true;observedAt=$now;windows=@($week)}|ConvertTo-Json -Depth 8),[Text.UTF8Encoding]::new($false))
+  [IO.File]::SetLastWriteTimeUtc($snapshotPath,$failedStamp)
+  Update-Quota
+  Assert-Equal $script:ui.WeekLeft.Text '90%' 'Repaired snapshot with the same timestamp is retried'
+  Assert-Equal $script:ui.Header.Text '剩余额度' 'Recovered snapshot clears error heading'
+  Assert-Equal $script:ui.ShortRow.Visibility Collapsed 'Recovered snapshot uses its current windows'
+  Write-Output 'PASS: repaired snapshot reloads without a timestamp change'
+
+  [IO.File]::SetLastWriteTimeUtc($snapshotPath,$failedStamp.AddSeconds(1))
+  $lockedFile=[IO.File]::Open($snapshotPath,[IO.FileMode]::Open,[IO.FileAccess]::ReadWrite,[IO.FileShare]::None)
+  try{Update-Quota}finally{$lockedFile.Dispose()}
+  Assert-Equal $script:status $null 'Unreadable snapshot discards previous account'
+  Assert-Equal $script:statusStamp 0 'Unreadable snapshot remains retryable'
+  Assert-Equal $script:ui.WeekLeft.Text '—' 'Unreadable snapshot clears percentage'
+  Assert-Equal $script:ui.WeekBar.Width 0 'Unreadable snapshot clears remaining bar'
+  Assert-Equal $script:ui.Header.Text '暂无法读取' 'Read failure has an explicit error heading'
+  Write-Output 'PASS: exclusive file lock is handled without retaining quota'
+
+  Update-Quota
+  Assert-Equal $script:ui.WeekLeft.Text '90%' 'Unlocked snapshot recovers automatically'
+  Assert-Equal $script:ui.Header.Text '剩余额度' 'Unlock clears error heading'
+  Write-Output 'PASS: unlocked snapshot reloads on the next update'
+
+  Move-Item -LiteralPath (Join-Path $script:dataDir 'status.json') -Destination (Join-Path $script:dataDir 'status.retained.json')
   Update-Quota
   Assert-Equal $script:status $null 'Removed snapshot is cleared'
   Assert-Equal $script:ui.ShortRow.Visibility Visible 'Loading is not treated as unsupported'
+  Assert-Equal $script:statusStamp 0 'Missing snapshot resets the timestamp'
+  Assert-Equal $script:ui.WeekLeft.Text '—' 'Missing snapshot clears previous percentage'
+  Assert-Equal $script:ui.Header.Text '正在读取' 'Missing snapshot retains normal loading behavior'
+  Write-Output 'PASS: missing snapshot clears quota and retains normal loading behavior'
   Write-Output 'PASS: two reset phases, native midpoint timer, restart and close timing, local dates, five timezones, daylight saving, layout and quota edge cases'
 }finally{
   foreach($timer in @($script:resetPhaseTimer,$finishTimer)){if($timer){$timer.Stop()}}
   $script:window.Close()
-  if([IO.Path]::GetFullPath($script:dataDir).StartsWith([IO.Path]::GetFullPath([IO.Path]::GetTempPath()),[StringComparison]::OrdinalIgnoreCase)){
+  if($env:GPTPET_KEEP_TEST_FIXTURES -ne '1' -and [IO.Path]::GetFullPath($script:dataDir).StartsWith([IO.Path]::GetFullPath([IO.Path]::GetTempPath()),[StringComparison]::OrdinalIgnoreCase)){
     Remove-Item -LiteralPath $script:dataDir -Recurse -Force
   }
 }

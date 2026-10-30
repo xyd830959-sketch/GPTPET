@@ -9,6 +9,7 @@ function fixture(t){
   const root=fs.mkdtempSync(path.join(os.tmpdir(),'gpt-niang-codex-path-'));
   const files=[],directories=[];
   t.after(()=>{
+    if(process.env.GPTPET_KEEP_TEST_FIXTURES==='1')return;
     for(const file of files){if(fs.existsSync(file))fs.unlinkSync(file);}
     for(const directory of directories.reverse()){if(fs.existsSync(directory))fs.rmdirSync(directory);}
     fs.rmdirSync(root);
@@ -44,7 +45,8 @@ test('the next refresh discovers another app update without restarting the worke
   const {root,write}=fixture(t);const old=write('OpenAI/Codex/bin/old/codex.exe',60000);
   const env={LOCALAPPDATA:root};const deleted=path.join(root,'removed/codex.exe');
   assert.equal(resolveCodexExecutable(deleted,{env,platform:'win32'}),old);
-  fs.unlinkSync(old);const next=write('OpenAI/Codex/bin/next/codex.exe');
+  if(process.env.GPTPET_KEEP_TEST_FIXTURES==='1')fs.renameSync(old,old+'.retained');else fs.unlinkSync(old);
+  const next=write('OpenAI/Codex/bin/next/codex.exe');
   assert.equal(resolveCodexExecutable(deleted,{env,platform:'win32'}),next);
 });
 

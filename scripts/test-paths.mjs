@@ -11,7 +11,7 @@ export function validateTestRoot(chosen, { source, userProfile, localAppData, pl
   };
   const base = key(resolved);
   const inside = value => base === key(value) || base.startsWith(key(value) + paths.sep);
-  if (base === key(paths.parse(resolved).root) || inside(source) || userProfile && base === key(userProfile) || localAppData && (base === key(localAppData) || inside(paths.join(localAppData, 'GPTNiangUsage')))) {
+  if (base === key(paths.parse(resolved).root) || inside(source) || userProfile && base === key(userProfile) || localAppData && (base === key(localAppData) || inside(paths.join(localAppData, 'GPTNiangUsage')) || inside(paths.join(localAppData, 'Programs', 'GPTNiangUsage')))) {
     throw new Error('Test root must not be the source, a drive root, the user profile or GPTNiangUsage personal data.');
   }
   return resolved;

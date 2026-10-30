@@ -436,10 +436,11 @@ function Set-ResetTimeMode([string]$mode,[long]$nowMilliseconds){
 }
 function Update-Quota {
   $file=Join-Path $script:dataDir 'status.json'
+  $snapshotReadFailed=$false
   try{$stamp=[IO.File]::GetLastWriteTimeUtc($file).Ticks
     if(!(Test-Path -LiteralPath $file)){$script:status=$null;$script:statusStamp=0}
-    elseif($stamp-ne $script:statusStamp){$script:status=Get-Content -LiteralPath $file -Raw -Encoding UTF8 | ConvertFrom-Json;$script:statusStamp=$stamp}
-  }catch{}
+    elseif($stamp-ne $script:statusStamp){$script:status=Get-Content -LiteralPath $file -Raw -Encoding UTF8 -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop;$script:statusStamp=$stamp}
+  }catch{$script:status=$null;$script:statusStamp=0;$snapshotReadFailed=$true}
   $now=[DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
   foreach($row in @(@{prefix='Short';minutes=300},@{prefix='Week';minutes=10080})){
     $prefix=$row.prefix;$q=@($script:status.windows|Where-Object{$_.minutes-eq $row.minutes})|Select-Object -First 1
@@ -447,8 +448,8 @@ function Update-Quota {
     $script:ui[$prefix+'Reset'].ToolTip=$null
     if(!$q){
       $script:ui[$prefix+'Used'].Text='已用 —';$script:ui[$prefix+'Left'].Text='—'
-      $script:ui[$prefix+'Reset'].Text=if($script:status -and $script:status.queryOk-ne $true){'额度读取异常'}else{'暂无额度数据'}
-      $script:ui[$prefix+'Bar'].Width=0;$script:ui[$prefix+'Left'].Foreground=[Windows.Media.BrushConverter]::new().ConvertFromString('#95889F');continue
+      $script:ui[$prefix+'Reset'].Text=if($snapshotReadFailed -or ($script:status -and $script:status.queryOk-ne $true)){'额度读取异常'}else{'暂无额度数据'}
+      $script:ui[$prefix+'Bar'].Width=0;$script:ui[$prefix+'Left'].Foreground=Get-WidgetSolidBrush '#95889F';continue
     }
     $hasReset=$null-ne $q.resetsAt -and [double]$q.resetsAt-gt 0
     $expired=$hasReset -and [double]$q.resetsAt-le $now
@@ -458,15 +459,15 @@ function Update-Quota {
     $script:ui[$prefix+'Reset'].Text=if($hasReset){Format-ResetDisplay ([long]$q.resetsAt) $now}else{'未提供重置时间'}
     if($hasReset){$script:ui[$prefix+'Reset'].ToolTip='本机时间 '+[DateTimeOffset]::FromUnixTimeSeconds([long]$q.resetsAt).ToLocalTime().ToString('yyyy-MM-dd HH:mm zzz')+' 重置 · '+(Reset-Label ([double]$q.resetsAt-$now))}
     $script:ui[$prefix+'Bar'].Width=if($expired){0}else{184*[double]$q.remaining/100}
-    $color=if($expired){'#B3A7C0'}elseif([double]$q.used-ge 90){'#D77659'}elseif([double]$q.used-ge 75){'#D0A051'}else{'#9B86C1'}
-    $script:ui[$prefix+'Bar'].Background=[Windows.Media.BrushConverter]::new().ConvertFromString($color)
-    $valueColor=if($expired){'#95889F'}elseif([double]$q.used-ge 90){'#B74839'}elseif([double]$q.used-ge 75){'#A06C1C'}else{'#745A98'}
-    $script:ui[$prefix+'Left'].Foreground=[Windows.Media.BrushConverter]::new().ConvertFromString($valueColor)
+    $palette=Get-WidgetQuotaPalette $q $expired
+    $script:ui[$prefix+'Bar'].Background=Get-WidgetSolidBrush $palette.bar
+    $script:ui[$prefix+'Left'].Foreground=Get-WidgetSolidBrush $palette.ink
   }
   $script:ui.WeekRow.Margin=if($script:ui.ShortRow.Visibility-eq [Windows.Visibility]::Collapsed){[Windows.Thickness]::new(0,1,0,0)}else{[Windows.Thickness]::new(0,4,0,0)}
   $age=if($script:status.observedAt){$now-[Math]::Floor([double]$script:status.observedAt/1000)}else{0}
   $dot='#9B86C1'
-  if(!$script:status){$script:ui.Status.Text='正在读取订阅额度…';$dot='#C5A96F'}
+  if($snapshotReadFailed){$script:ui.Status.Text='额度快照读取失败 · 点击 ↻ 重试';$dot='#C5A96F'}
+  elseif(!$script:status){$script:ui.Status.Text='正在读取订阅额度…';$dot='#C5A96F'}
   elseif(!$script:status.ok){$script:ui.Status.Text=$script:status.error;$dot='#C5A96F'}
   else{
     $at=[DateTimeOffset]::FromUnixTimeMilliseconds([long]$script:status.observedAt).ToLocalTime().ToString('HH:mm:ss')
@@ -474,9 +475,9 @@ function Update-Quota {
     elseif($age-gt 180){$mins=[Math]::Floor($age/60);$script:ui.Status.Text="$mins 分钟前的额度 · 点击 ↻ 刷新";$dot='#C5A96F'}
     else{$script:ui.Status.Text="$at 更新 · 实时订阅额度"}
   }
-  $script:ui.LiveDot.Fill=[Windows.Media.BrushConverter]::new().ConvertFromString($dot)
+  $script:ui.LiveDot.Fill=Get-WidgetSolidBrush $dot
   $script:ui.Status.ToolTip=$script:ui.Status.Text
-  $script:ui.Header.Text=if(!$script:status){'正在读取'}elseif(!$script:status.ok){'暂无法读取'}elseif($script:status.error -or $age-gt 180){'上次剩余额度'}else{'剩余额度'}
+  $script:ui.Header.Text=if($snapshotReadFailed){'暂无法读取'}elseif(!$script:status){'正在读取'}elseif(!$script:status.ok){'暂无法读取'}elseif($script:status.error -or $age-gt 180){'上次剩余额度'}else{'剩余额度'}
   Update-BubbleTooltip
   if($script:widgetColors){Update-WidgetColorScene}
 }
@@ -613,6 +614,7 @@ function Stop-WidgetRuntime {
   try{if($script:hostFollower){$script:hostFollower.Dispose()}}catch{}
   foreach($timer in @($script:timer,$script:hostEventTimer,$script:menuTimer,$script:sceneTimer,$script:resetPhaseTimer,$script:closeTimer)){try{if($timer){$timer.Stop()}}catch{}}
   try{Stop-WidgetAudio}catch{}
+  try{Stop-WallpaperAction}catch{}
   foreach($hook in $script:eventHooks){try{if($hook-ne [IntPtr]::Zero){[GptWidgetNative]::UnhookWinEvent($hook)|Out-Null}}catch{}}
   if($script:worker){try{if(!$script:worker.HasExited){$script:worker.Kill()}}catch{}; $script:worker.Dispose();$script:worker=$null}
   foreach($name in @('runtime.json','presence.json')){

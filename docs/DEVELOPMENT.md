@@ -14,6 +14,8 @@
 
 测试会创建和删除合成文件。必须先选择专用目录并明确同意该范围的测试清理。不要把源代码目录、正式安装或个人配置目录设为测试根目录。下面的允许变量仅表示执行者对其选定目录中测试生成数据的同意；自动代理仍须遵守用户要求的确认流程。
 
+如不允许批量清理，先设置专用的 `GPTPET_TEST_ROOT`，运行 `node scripts/run-tests.mjs --keep-fixtures`。该模式保留测试目录与合成文件，不需要设置清理授权变量；运行时请求、锁和临时文件仍按被测功能正常结束。模拟文件缺失时将测试副本改名保留。报告和预览同样保留，之后清理须单独确认路径和数量。
+
 ```powershell
 $env:GPTPET_TEST_ROOT = Join-Path $env:TEMP 'gptpet-isolated-tests'
 $env:GPTPET_ALLOW_TEST_CLEANUP = '1'

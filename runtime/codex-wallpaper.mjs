@@ -77,8 +77,38 @@ function saveState(paths, state) {
 }
 
 function imagePath(paths, selected) {
-  if (!/^[a-f0-9]{64}\.(png|jpg|webp)$/.test(selected || '')) throw new Error('没有可用的已导入壁纸。');
+  if (typeof selected !== 'string' || selected.length > 200 || selected !== selected.trim() ||
+      /[<>:"/\\|?*\x00-\x1f\x7f-\x9f]/.test(selected) ||
+      !/^.+\.(png|jpe?g|webp)$/i.test(selected) || /[. ]\.(png|jpe?g|webp)$/i.test(selected) ||
+      /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(selected)) throw new Error('没有可用的已导入壁纸。');
   return path.join(paths.images, selected);
+}
+
+function readImportedImage(paths, selected) {
+  const file = imagePath(paths, selected);
+  let bytes;
+  try {
+    const stat = fs.lstatSync(file);
+    if (!stat.isFile() || stat.isSymbolicLink()) throw new Error('请选择有效的已导入壁纸。');
+    if (stat.size > MAX_BYTES) throw new Error('壁纸超过 10 MB。');
+    bytes = fs.readFileSync(file);
+  } catch (error) {
+    if (error.code === 'ENOENT') throw new Error('所选壁纸已不存在，请重新选择。');
+    throw error;
+  }
+  if (bytes.length > MAX_BYTES) throw new Error('壁纸超过 10 MB。');
+  const info = imageInfo(bytes);
+  if (/^[a-f0-9]{64}\.(png|jpg|webp)$/.test(selected) && crypto.createHash('sha256').update(bytes).digest('hex') !== selected.slice(0, 64)) throw new Error('壁纸文件校验失败。');
+  return { bytes, ...info };
+}
+
+function importFileName(value, extension) {
+  if (typeof value !== 'string') throw new Error('请输入有效的壁纸文件名。');
+  const stem = value.trim().replace(/\.(png|jpe?g|webp)$/i, '');
+  if (!stem || stem.length > 80) throw new Error('壁纸文件名需为 1 至 80 个字符。');
+  const name = stem + extension;
+  imagePath({ images: '' }, name);
+  return name;
 }
 
 function validateEndpoint(value, port, targetId, kind) {
@@ -117,24 +147,40 @@ async function cdpTargets(port) {
 async function evaluate(socketUrl, expression) {
   const socket = new WebSocket(socketUrl);
   try {
-    await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => reject(new Error('Codex 连接超时。')), 2500);
-      socket.addEventListener('open', () => { clearTimeout(timeout); resolve(); }, { once: true });
-      socket.addEventListener('error', () => { clearTimeout(timeout); reject(new Error('无法连接 Codex 页面。')); }, { once: true });
-    });
-    const result = await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => reject(new Error('Codex 页面未响应。')), 3000);
-      socket.addEventListener('message', event => {
+    return await new Promise((resolve, reject) => {
+      let settled = false, timeout;
+      const finish = (error, value) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeout);
+        socket.removeEventListener('open', opened);
+        socket.removeEventListener('message', received);
+        socket.removeEventListener('error', failed);
+        socket.removeEventListener('close', closed);
+        if (error) reject(error); else resolve(value);
+      };
+      const failed = () => finish(new Error('无法连接 Codex 页面。'));
+      const closed = () => finish(new Error('Codex 页面连接已断开，请重试。'));
+      const opened = () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => finish(new Error('Codex 页面未响应。')), 3000);
+        try {
+          socket.send(JSON.stringify({ id: 1, method: 'Runtime.evaluate', params: { expression, returnByValue: true, awaitPromise: false } }));
+        } catch { failed(); }
+      };
+      const received = event => {
         let message;
         try { message = JSON.parse(String(event.data)); } catch { return; }
-        if (message.id !== 1) return;
-        clearTimeout(timeout);
-        if (message.error || message.result?.exceptionDetails) reject(new Error('Codex 页面拒绝了壁纸操作。'));
-        else resolve(message.result?.result?.value);
-      });
-      socket.send(JSON.stringify({ id: 1, method: 'Runtime.evaluate', params: { expression, returnByValue: true, awaitPromise: false } }));
+        if (message?.id !== 1) return;
+        if (message.error || message.result?.exceptionDetails) finish(new Error('Codex 页面拒绝了壁纸操作。'));
+        else finish(null, message.result?.result?.value);
+      };
+      timeout = setTimeout(() => finish(new Error('Codex 连接超时。')), 2500);
+      socket.addEventListener('open', opened);
+      socket.addEventListener('message', received);
+      socket.addEventListener('error', failed);
+      socket.addEventListener('close', closed);
     });
-    return result;
   } finally { socket.close(); }
 }
 
@@ -181,30 +227,32 @@ html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-compact-page-gutter="false"]:has(> 
   })()`;
 }
 
-async function perform(action, paths, state) {
+async function perform(action, paths, state, validatedImage) {
   const pages = await cdpTargets(state.port);
   let success = 0;
   let lastError;
   let dataUrl = '';
   if (action === 'apply') {
-    const selectedPath = imagePath(paths, state.selected);
-    if (fs.statSync(selectedPath).size > MAX_BYTES) throw new Error('壁纸超过 10 MB。');
-    const bytes = fs.readFileSync(selectedPath);
-    const { mime } = imageInfo(bytes);
-    if (bytes.length > MAX_BYTES) throw new Error('壁纸超过 10 MB。');
-    if (crypto.createHash('sha256').update(bytes).digest('hex') !== state.selected.slice(0, 64)) throw new Error('壁纸文件校验失败。');
+    const { bytes, mime } = validatedImage ?? readImportedImage(paths, state.selected);
     dataUrl = `data:${mime};base64,${bytes.toString('base64')}`;
   }
-  for (const page of pages) {
-    try {
-      const result = await evaluate(page.socket, rendererExpression(action, dataUrl, state.dimming));
-      if (result === true) success++;
-      else if (result === 'dream-skin-active') lastError = new Error('Codex Dream Skin 正在使用中，请先暂停它再应用 GPT 娘壁纸。');
-      else if (result === 'unsupported-layout') lastError = new Error('当前 Codex 页面结构暂不支持壁纸。');
-    } catch (error) { lastError = error; }
+  const expression = rendererExpression(action, dataUrl, state.dimming);
+  let nextPage = 0;
+  // Bound concurrent sockets while avoiding one timeout per window in sequence.
+  async function applyPages() {
+    while (nextPage < pages.length) {
+      const page = pages[nextPage++];
+      try {
+        const result = await evaluate(page.socket, expression);
+        if (result === true) success++;
+        else if (result === 'dream-skin-active') lastError = new Error('Codex Dream Skin 正在使用中，请先暂停它再应用 GPT 娘壁纸。');
+        else if (result === 'unsupported-layout') lastError = new Error('当前 Codex 页面结构暂不支持壁纸。');
+      } catch (error) { lastError = error; }
+    }
   }
+  await Promise.all(Array.from({ length: Math.min(4, pages.length) }, applyPages));
   if (!success) throw new Error(lastError?.message || '壁纸操作未能在 Codex 页面生效。');
-  return { pages: success };
+  return { pages: success, totalPages: pages.length, ...(success < pages.length ? { warning: `${pages.length - success} 个页面未完成操作：${lastError?.message || '页面未确认生效'}` } : {}) };
 }
 
 export async function run(command, dataDir, sourcePath, options = {}) {
@@ -216,6 +264,13 @@ export async function run(command, dataDir, sourcePath, options = {}) {
     state.port = options.port;
   }
   if (command === 'status') return { ...state, selectedName: state.selected ? state.selected : null };
+  if (command === 'select') {
+    const image = readImportedImage(paths, sourcePath);
+    state.selected = sourcePath; saveState(paths, state);
+    if (!state.enabled) return { selected: state.selected, enabled: false, applied: false };
+    try { return { selected: state.selected, enabled: true, applied: true, ...(await perform('apply', paths, state, image)) }; }
+    catch (error) { return { selected: state.selected, enabled: true, applied: false, warning: error.message }; }
+  }
   if (command === 'enable') { state.enabled = true; saveState(paths, state); return { enabled: true }; }
   if (command === 'set-dimming') {
     const dimming = Number(sourcePath);
@@ -229,7 +284,7 @@ export async function run(command, dataDir, sourcePath, options = {}) {
   }
   if (command === 'disable') {
     state.enabled = false; saveState(paths, state);
-    try { await perform('restore', paths, state); return { enabled: false, restored: true }; }
+    try { const result = await perform('restore', paths, state); return { enabled: false, restored: result.pages === result.totalPages, ...result }; }
     catch (error) { return { enabled: false, restored: false, warning: error.message }; }
   }
   if (command === 'import') {
@@ -239,13 +294,22 @@ export async function run(command, dataDir, sourcePath, options = {}) {
     if (!bytes.length || bytes.length > MAX_BYTES) throw new Error('壁纸必须是 10 MB 以内的 PNG、JPG 或 WebP 图片。');
     const info = imageInfo(bytes);
     const hash = crypto.createHash('sha256').update(bytes).digest('hex');
-    const name = hash + info.extension;
+    const requestedName = options.name === undefined ? hash + info.extension : importFileName(options.name, info.extension);
+    if (/^[a-f0-9]{64}\.(png|jpg|webp)$/.test(requestedName) && requestedName.slice(0, 64) !== hash) throw new Error('该文件名保留用于内容校验，请换一个名称。');
+    let name = requestedName;
     fs.mkdirSync(paths.images, { recursive: true });
-    try { fs.writeFileSync(imagePath(paths, name), bytes, { flag: 'wx' }); }
-    catch (error) {
-      if (error.code !== 'EEXIST') throw error;
-      const existing=fs.readFileSync(imagePath(paths, name));
-      if (crypto.createHash('sha256').update(existing).digest('hex') !== hash) throw new Error('同名壁纸文件内容不一致，已停止导入。');
+    for (let index = 2; ; index++) {
+      try { fs.writeFileSync(imagePath(paths, name), bytes, { flag: 'wx' }); break; }
+      catch (error) {
+        if (error.code !== 'EEXIST') throw error;
+        const existingPath = imagePath(paths, name), stat = fs.lstatSync(existingPath);
+        if (stat.isFile() && !stat.isSymbolicLink() && stat.size === bytes.length && fs.readFileSync(existingPath).equals(bytes)) {
+          name = fs.readdirSync(paths.images).find(entry => entry.toLowerCase() === name.toLowerCase()) || name;
+          break;
+        }
+        if (options.name === undefined) throw new Error('同名壁纸文件内容不一致，已停止导入。');
+        name = path.basename(requestedName, info.extension) + ` (${index})` + info.extension;
+      }
     }
     state.selected = name; saveState(paths, state);
     return { selected: name, width: info.width, height: info.height };
@@ -260,9 +324,10 @@ export async function run(command, dataDir, sourcePath, options = {}) {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const [command, dataDir, sourcePath, resultFile] = process.argv.slice(2);
+  const [command, dataDir, sourcePath, resultFile, encodedName] = process.argv.slice(2);
   try {
-    const result = await run(command, dataDir, sourcePath);
+    const options = encodedName ? { name: Buffer.from(encodedName, 'base64').toString('utf8') } : {};
+    const result = await run(command, dataDir, sourcePath, options);
     if (resultFile) fs.writeFileSync(resultFile, JSON.stringify({ ok: true, ...result }), { flag: 'w' });
     else console.log(JSON.stringify({ ok: true, ...result }));
   } catch (error) {

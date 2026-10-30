@@ -48,5 +48,5 @@ test('request content changes remain detectable with identical file timestamps',
     const second=readRefreshRequest(flag);
     assert.notEqual(first,second);assert.equal(second,readRefreshRequest(flag));
     fs.writeFileSync(flag,'');assert.equal(readRefreshRequest(flag),null);
-  } finally {if(fs.existsSync(flag))fs.unlinkSync(flag);fs.rmdirSync(dir);}
+  } finally {if(process.env.GPTPET_KEEP_TEST_FIXTURES!=='1'){if(fs.existsSync(flag))fs.unlinkSync(flag);fs.rmdirSync(dir);}}
 });

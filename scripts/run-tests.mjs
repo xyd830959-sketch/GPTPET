@@ -7,15 +7,16 @@ import { validateTestRoot } from './test-paths.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const chosen = process.env.GPTPET_TEST_ROOT;
-if (!chosen || !path.isAbsolute(chosen) || process.env.GPTPET_ALLOW_TEST_CLEANUP !== '1') {
-  console.error('Choose an absolute GPTPET_TEST_ROOT and explicitly set GPTPET_ALLOW_TEST_CLEANUP=1 for synthetic fixture cleanup. See docs/DEVELOPMENT.md.');
+const retain = process.argv.includes('--keep-fixtures');
+if (!chosen || !path.isAbsolute(chosen) || !retain && process.env.GPTPET_ALLOW_TEST_CLEANUP !== '1') {
+  console.error('Choose an absolute GPTPET_TEST_ROOT and use --keep-fixtures or explicitly approve GPTPET_ALLOW_TEST_CLEANUP=1. See docs/DEVELOPMENT.md.');
   process.exit(2);
 }
 const base = validateTestRoot(chosen, { source: root, userProfile: os.homedir(), localAppData: process.env.LOCALAPPDATA });
 fs.mkdirSync(base, { recursive: true });
 if (fs.realpathSync(base).toLowerCase() !== base.toLowerCase()) throw new Error('Test root must not redirect through a link.');
 const runRoot = fs.mkdtempSync(path.join(base, 'run-'));
-const env = { ...process.env, GPTPET_TEST_ROOT: runRoot, TEMP: runRoot, TMP: runRoot, TMPDIR: runRoot };
+const env = { ...process.env, GPTPET_KEEP_TEST_FIXTURES: retain ? '1' : '0', GPTPET_TEST_ROOT: runRoot, TEMP: runRoot, TMP: runRoot, TMPDIR: runRoot };
 const reports = [];
 let failure = false;
 function run(label, command, args) {

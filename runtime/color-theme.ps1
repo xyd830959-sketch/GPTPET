@@ -8,6 +8,31 @@ $script:widgetColorRandom=[Random]::new()
 $script:colorSpecialQuotes=@('Token来，Token来')
 $script:colorSceneScope='none';$script:colorSceneKey='';$script:colorSpecialLast=''
 
+# Quota colours are shared by normal rendering and restoring an animated theme.
+$script:widgetQuotaPalettes=@{
+  unavailable=@{ink='#95889F';bar='#AA95CD'}
+  expired=@{ink='#95889F';bar='#B3A7C0'}
+  critical=@{ink='#B74839';bar='#D77659'}
+  warning=@{ink='#A06C1C';bar='#D0A051'}
+  normal=@{ink='#745A98';bar='#9B86C1'}
+}
+$script:widgetSolidBrushCache=@{}
+
+function Get-WidgetQuotaPalette($Quota,[bool]$Expired){
+  $key=if(!$Quota){'unavailable'}elseif($Expired){'expired'}elseif([double]$Quota.used-ge 90){'critical'}elseif([double]$Quota.used-ge 75){'warning'}else{'normal'}
+  return $script:widgetQuotaPalettes[$key]
+}
+
+function Get-WidgetSolidBrush([string]$Color){
+  if(!$script:widgetSolidBrushCache.ContainsKey($Color)){
+    $brush=[Windows.Media.BrushConverter]::new().ConvertFromString($Color)
+    # Shared fixed colours must remain immutable; animated gradients are separate.
+    $brush.Freeze()
+    $script:widgetSolidBrushCache[$Color]=$brush
+  }
+  return $script:widgetSolidBrushCache[$Color]
+}
+
 function Get-WidgetBubbleQuote([string]$DataDir){
   # Choose the text from its own pool before drawing an unrelated appearance.
   $text=Get-WidgetQuote $DataDir
@@ -87,10 +112,9 @@ function Restore-WidgetOriginalColors([switch]$KeepAnimation) {
   foreach($row in @(@{prefix='Short';minutes=300},@{prefix='Week';minutes=10080})){
     $q=@($script:status.windows|Where-Object{$_.minutes-eq $row.minutes})|Select-Object -First 1
     $expired=$q -and $q.resetsAt -and [double]$q.resetsAt-le [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
-    $ink=if(!$q -or $expired){'#95889F'}elseif([double]$q.used-ge 90){'#B74839'}elseif([double]$q.used-ge 75){'#A06C1C'}else{'#745A98'}
-    $bar=if(!$q){'#AA95CD'}elseif($expired){'#B3A7C0'}elseif([double]$q.used-ge 90){'#D77659'}elseif([double]$q.used-ge 75){'#D0A051'}else{'#9B86C1'}
-    $script:ui[$row.prefix+'Left'].Foreground=[Windows.Media.BrushConverter]::new().ConvertFromString($ink)
-    $script:ui[$row.prefix+'Bar'].Background=[Windows.Media.BrushConverter]::new().ConvertFromString($bar)
+    $palette=Get-WidgetQuotaPalette $q $expired
+    $script:ui[$row.prefix+'Left'].Foreground=Get-WidgetSolidBrush $palette.ink
+    $script:ui[$row.prefix+'Bar'].Background=Get-WidgetSolidBrush $palette.bar
   }
   $script:widgetColors.halo.Visibility=[Windows.Visibility]::Collapsed
   $script:widgetColors.tint.Visibility=[Windows.Visibility]::Collapsed

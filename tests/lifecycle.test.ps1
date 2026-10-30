@@ -110,6 +110,7 @@ setInterval(heartbeat,100);
     try{$script:worker.Dispose()}catch{}
   }
   try{if($script:mutexOwned){$script:mutex.ReleaseMutex()};if($script:mutex){$script:mutex.Dispose()}}catch{}
+  if($env:GPTPET_KEEP_TEST_FIXTURES -ne '1'){
   foreach($directory in @($script:dataDir,$runtimeDir)){
     if([IO.Directory]::Exists($directory)){
       foreach($file in [IO.Directory]::GetFiles($directory)){[IO.File]::Delete($file)}
@@ -118,4 +119,5 @@ setInterval(heartbeat,100);
   }
   if([IO.File]::Exists($script:configPath)){[IO.File]::Delete($script:configPath)}
   if([IO.Directory]::Exists($testDir)){[IO.Directory]::Delete($testDir)}
+  }
 }

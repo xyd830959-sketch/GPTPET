@@ -45,7 +45,7 @@ test('exclusive worker ownership survives stale metadata and cannot be released 
     assert.equal(readJson(path.join(dir,'worker.lock')).token,second.owner.token);
   } finally {
     if(first)await first.release();if(second)await second.release();
-    fs.rmSync(dir,{recursive:true,force:true});
+    if(process.env.GPTPET_KEEP_TEST_FIXTURES!=='1')fs.rmSync(dir,{recursive:true,force:true});
   }
 });
 
@@ -63,7 +63,7 @@ test('concurrent clients receive correlated results without writing the quota st
     assert.equal(fs.existsSync(path.join(dir,'status.json')),false);
     assert.equal(readPendingRequests(dir).length,0);
     assert.deepEqual(fs.readdirSync(path.join(dir,'refresh-results')),[]);
-  } finally {clearTimeout(timer);fs.rmSync(dir,{recursive:true,force:true});}
+  } finally {clearTimeout(timer);if(process.env.GPTPET_KEEP_TEST_FIXTURES!=='1')fs.rmSync(dir,{recursive:true,force:true});}
 });
 
 test('refresh timeout cleans its request and does not return an unrelated cached account',async()=>{
@@ -74,7 +74,7 @@ test('refresh timeout cleans its request and does not return an unrelated cached
     assert.equal(result.ok,false);assert.equal(result.queryOk,false);assert.deepEqual(result.windows,[]);
     assert.equal(readPendingRequests(dir).length,0);
     assert.equal(readJson(path.join(dir,'status.json')).accountKey,'old-account');
-  } finally {fs.rmSync(dir,{recursive:true,force:true});}
+  } finally {if(process.env.GPTPET_KEEP_TEST_FIXTURES!=='1')fs.rmSync(dir,{recursive:true,force:true});}
 });
 
 test('a headless client retries an unavailable worker and recovers within its deadline',async()=>{
@@ -86,7 +86,7 @@ test('a headless client retries an unavailable worker and recovers within its de
       if(++starts===2)completeRequests(dir,readPendingRequests(dir),snapshot);
     }});
     assert.equal(starts,2);assert.deepEqual(result,snapshot);
-  } finally {fs.rmSync(dir,{recursive:true,force:true});}
+  } finally {if(process.env.GPTPET_KEEP_TEST_FIXTURES!=='1')fs.rmSync(dir,{recursive:true,force:true});}
 });
 
 test('two actual worker startups share one writer and recover an absent GUI for headless callers',async()=>{
@@ -117,7 +117,7 @@ test('two actual worker startups share one writer and recover an absent GUI for 
     assert.equal(fs.existsSync(path.join(dir,'worker-status.json')),false);
   } finally {
     for(const child of children)if(child.exitCode===null && child.signalCode===null){const exited=once(child,'exit');child.kill();await exited;}
-    fs.rmSync(dir,{recursive:true,force:true});
+    if(process.env.GPTPET_KEEP_TEST_FIXTURES!=='1')fs.rmSync(dir,{recursive:true,force:true});
   }
 });
 
@@ -139,7 +139,7 @@ test('worker exits when its GUI parent exits and releases ownership',async()=>{
     assert.equal(fs.existsSync(path.join(dir,'worker-status.json')),false);
   } finally {
     for(const proc of [child,parent])if(proc && proc.exitCode===null && proc.signalCode===null){const exited=once(proc,'exit');proc.kill();await exited;}
-    fs.rmSync(dir,{recursive:true,force:true});
+    if(process.env.GPTPET_KEEP_TEST_FIXTURES!=='1')fs.rmSync(dir,{recursive:true,force:true});
   }
 });
 
@@ -167,7 +167,7 @@ test('Windows pipe ownership recovers after a force-killed worker leaves stale f
     const stopped=once(second,'exit');fs.writeFileSync(path.join(dir,'stop.flag'),'test-stop');await stopped;
   } finally {
     for(const child of children)if(child.exitCode===null && child.signalCode===null){const exited=once(child,'exit');child.kill();await exited;}
-    fs.rmSync(dir,{recursive:true,force:true});
+    if(process.env.GPTPET_KEEP_TEST_FIXTURES!=='1')fs.rmSync(dir,{recursive:true,force:true});
   }
 });
 
@@ -201,6 +201,6 @@ for(const mode of ['request-file','refresh-flag'])test('an account switch during
     const exited=once(child,'exit');fs.writeFileSync(path.join(dir,'stop.flag'),'test-stop');await exited;
   } finally {
     if(child && child.exitCode===null && child.signalCode===null){const exited=once(child,'exit');child.kill();await exited;}
-    fs.rmSync(dir,{recursive:true,force:true});
+    if(process.env.GPTPET_KEEP_TEST_FIXTURES!=='1')fs.rmSync(dir,{recursive:true,force:true});
   }
 });

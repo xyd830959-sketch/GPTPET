@@ -11,7 +11,7 @@ test('test root cannot point at source using different Windows casing or normali
 });
 
 test('test root refuses drive roots, user profile, personal data root and its descendants', () => {
-  for (const chosen of ['D:\\', 'c:\\USERS\\fixture', context.localAppData, context.localAppData + '\\GPTNiangUsage', context.localAppData + '\\gptniangusage\\state']) {
+  for (const chosen of ['D:\\', 'c:\\USERS\\fixture', context.localAppData, context.localAppData + '\\GPTNiangUsage', context.localAppData + '\\gptniangusage\\state', context.localAppData + '\\Programs\\GPTNiangUsage', context.localAppData + '\\Programs\\GPTNiangUsage\\gpt-niang-usage\\']) {
     assert.throws(() => validateTestRoot(chosen, context), /must not/);
   }
 });

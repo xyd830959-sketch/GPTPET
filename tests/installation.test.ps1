@@ -20,7 +20,7 @@ try{
   Assert ((Get-WidgetInstallationDataDir $moved @{appDir=$old;dataDir=$missingData;disabledAt='2026-10-02T00:00:00Z'})-eq $missingData) 'explicit disable survives deletion of preferences'
   $null=New-Item -ItemType Directory -Path $old
   Assert-Throws {Get-WidgetInstallationDataDir $moved @{appDir=$old;dataDir=$data;disabledAt='2026-10-02T00:00:00Z'}} '*original installation folder still exists*' 'copy cannot claim existing installation'
-  Remove-Item -LiteralPath $old
+  Move-Item -LiteralPath $old -Destination ($old+'.retained')
   Assert-Throws {Get-WidgetInstallationDataDir $moved @{appDir=$old;dataDir=$missingData}} '*without disabling*' 'active moved installation is rejected'
   $shortcut=@{TargetPath=(Join-Path $env:WINDIR 'System32\wscript.exe');Arguments=('"'+(Join-Path $moved 'launch.vbs')+'"')}
   Assert (Test-WidgetStartupShortcutIdentity $shortcut $moved) 'bracket path shortcut matches literally'
@@ -64,16 +64,16 @@ try{
   $workerFile=Join-Path $moved 'runtime\worker-state.mjs'
   $workerBytes=[IO.File]::ReadAllBytes($workerFile)
   try{
-    Remove-Item -LiteralPath $workerFile
+    Move-Item -LiteralPath $workerFile -Destination ($workerFile+'.retained')
     Assert-Throws {& (Join-Path $moved 'Install.ps1') -CheckOnly} '*Missing file: runtime\worker-state.mjs' 'missing worker dependencies are rejected before registration'
-  }finally{[IO.File]::WriteAllBytes($workerFile,$workerBytes)}
+  }finally{Move-Item -LiteralPath ($workerFile+'.retained') -Destination $workerFile}
   $colorFile=Join-Path $moved 'runtime\color-theme.ps1'
   $colorBytes=[IO.File]::ReadAllBytes($colorFile)
   try{
-    Remove-Item -LiteralPath $colorFile
+    Move-Item -LiteralPath $colorFile -Destination ($colorFile+'.retained')
     Assert-Throws {& (Join-Path $moved 'Install.ps1') -CheckOnly} '*Missing file: runtime\color-theme.ps1' 'missing color module is rejected before registration'
     Assert ([Convert]::ToBase64String([IO.File]::ReadAllBytes($configFile))-eq $initialConfigBytes) 'missing color module rejection preserves config'
-  }finally{[IO.File]::WriteAllBytes($colorFile,$colorBytes)}
+  }finally{Move-Item -LiteralPath ($colorFile+'.retained') -Destination $colorFile}
   $info=Get-WidgetSupervisorInfo $moved @{appDir=$moved;dataDir=$data}
   $global:widgetInstallerTestTasks=@([pscustomobject]@{TaskName=$info.TaskName;TaskPath=$info.TaskPath;Principal=@{UserId=$info.Sid;LogonType='Interactive';RunLevel='Limited'};Actions=@(@{Execute=$info.Execute;Arguments='"'+(Join-Path $old 'supervisor.vbs')+'"';WorkingDirectory=$old})})
   Assert-Throws {& (Join-Path $moved 'Install.ps1') -CheckOnly} '*task action path mismatch*' 'foreign task is rejected during CheckOnly'
@@ -121,5 +121,5 @@ try{
   $resolved=[IO.Path]::GetFullPath($testRoot)
   $tempPrefix=[IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd('\')+'\'
   if(!$resolved.StartsWith($tempPrefix,[StringComparison]::OrdinalIgnoreCase) -or [IO.Path]::GetFileName($resolved)-notlike 'gpt-niang-install-test-*'){throw 'Unsafe test cleanup path.'}
-  Remove-Item -LiteralPath $resolved -Recurse -Force
+  if($env:GPTPET_KEEP_TEST_FIXTURES -ne '1'){Remove-Item -LiteralPath $resolved -Recurse -Force}
 }
