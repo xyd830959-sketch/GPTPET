@@ -1,0 +1,33 @@
+{
+  "revision": "user-action-audio-20261104-v1",
+  "files": [
+    {
+      "action": "click",
+      "file": "click-pout-fast-v2.wav",
+      "sha256": "0600e9015ad4887d81b87f027da2aea5cd14b506993a1f4dcaa978d18fdc7536"
+    },
+    {
+      "action": "drag",
+      "file": "drag-flustered-soft-v4.wav",
+      "sha256": "ff5b781dbf29e647f890e27675bb6fce4286c7912685fe9222333e3dc8990f63"
+    },
+    {
+      "action": "wave",
+      "file": "user-wave-20261104-v1.wav",
+      "sha256": "8535c69e8d21635318113ea0e26c407557c0350f76164cb9d0cfb1acf14b94fe"
+    },
+    {
+      "action": "laugh",
+      "file": "user-laugh-20261104-v1.wav",
+      "sha256": "85384352e6d0c5105a43510fdb4e9453585063656dd4ca6f7fa2f46e6c07d130"
+    },
+    {
+      "action": "yawn",
+      "file": "user-yawn-20261104-v1.wav",
+      "sha256": "d4e673e7102d20388a8825ead56b5bab93be59fb90133e276f0fe793917e2770"
+    }
+  ],
+  "source": "User-selected processed reaction files; original recordings are excluded.",
+  "voiceIdentityVerified": false,
+  "codeLicenseDoesNotGrantVoiceRights": true
+}

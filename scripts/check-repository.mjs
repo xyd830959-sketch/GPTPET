@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import {isLocalOnly,listDistributionFiles} from './repository-files.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const failures = [], warnings = [];
@@ -21,18 +22,7 @@ const originalCopyright = 'Copyright (c) 2026 Local GPT Niang Widget contributor
 requireCondition(fs.readFileSync(path.join(root, 'LICENSE'), 'utf8').includes(originalCopyright), 'Original v1.2.5 copyright missing.');
 const required = ['README.md', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'CONTRIBUTING.md', 'SECURITY.md', 'CHANGELOG.md', 'assets/CHARACTER-NOTICE.txt', 'docs/PROVENANCE.md', 'docs/INSTALLATION.md', 'docs/COMPATIBILITY.md', 'docs/DEVELOPMENT.md', 'docs/RELEASE_CHECKLIST.md', '.github/workflows/ci.yml'];
 for (const relative of required) requireCondition(fs.existsSync(path.join(root, relative)), `Missing ${relative}.`);
-const skip = new Set(['.git', 'node_modules', 'work', 'dist', 'state', 'verification-data', 'experiment-data', 'test-results']);
-const files = [];
-function walk(directory) {
-  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-    if (skip.has(entry.name)) continue;
-    const full = path.join(directory, entry.name);
-    if (entry.isSymbolicLink()) { failures.push(`Symbolic link needs review: ${path.relative(root, full)}`); continue; }
-    if (entry.isDirectory()) walk(full);
-    else files.push(full);
-  }
-}
-walk(root);
+const files=listDistributionFiles(root);
 const secretPatterns = [
   ['GitHub credential', /\b(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{30,})\b/],
   ['API credential', /\bsk-(?:proj-|svcacct-)?[A-Za-z0-9_-]{20,}\b/],
@@ -48,7 +38,9 @@ function scan(bytes, label, historical = false) {
 }
 for (const full of files) {
   const relative = path.relative(root, full).replaceAll('\\', '/');
-  requireCondition(!/^(?:installation|auth|credentials)\.json$|^\.env(?:\.|$)|\.(?:pem|key)$/i.test(relative), `Personal configuration must not be distributed: ${relative}`);
+  requireCondition(!isLocalOnly(relative), `Personal configuration must not be distributed: ${relative}`);
+  if(!fs.existsSync(full)){failures.push(`Distribution file is missing: ${relative}`);continue;}
+  if(fs.lstatSync(full).isSymbolicLink()){failures.push(`Symbolic link needs review: ${relative}`);continue;}
   const bytes = fs.readFileSync(full);
   scan(bytes, relative);
   if (!relative.endsWith('.md')) continue;

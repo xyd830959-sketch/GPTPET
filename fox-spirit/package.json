@@ -1,0 +1,9 @@
+{
+  "name": "gptpet-fox-preview",
+  "version": "1.3.0-preview.1",
+  "private": true,
+  "type": "module",
+  "description": "Source-only Windows fox character preview for GPTPET",
+  "engines": {"node": ">=22"},
+  "license": "MIT"
+}
