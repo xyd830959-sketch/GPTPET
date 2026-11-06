@@ -16,3 +16,7 @@ node_modules/
 /verification-data/
 /experiment-data/
 /test-results/
+/fox-spirit/runtime/ffmpeg/*.exe
+/fox-spirit/preview.png
+installation.json.previous
+installation.json.new

@@ -1,0 +1,533 @@
+{
+    "version":  1,
+    "quotes":  [
+                   {
+                       "text":  "又来找我啦？这里给你留着呢。",
+                       "display":  "又来找我啦？\n这里给你留着呢。",
+                       "layout":  {
+                                      "fontSize":  28,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "你忙你的，我就在旁边待着。",
+                       "display":  "你忙你的，\n我就在旁边待着。",
+                       "layout":  {
+                                      "fontSize":  28,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "今天先做什么？我陪你起个头。",
+                       "display":  "今天先做什么？\n我陪你起个头。",
+                       "layout":  {
+                                      "fontSize":  31,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "不着急，我又不会跑远。",
+                       "display":  "不着急，\n我又不会跑远。",
+                       "layout":  {
+                                      "fontSize":  32,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "靠近一点也没关系，我认得你的。",
+                       "display":  "靠近一点也没关系，\n我认得你的。",
+                       "layout":  {
+                                      "fontSize":  26,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "有什么好事，也分我一点欢喜。",
+                       "display":  "有什么好事，\n也分我一点欢喜。",
+                       "layout":  {
+                                      "fontSize":  28,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "你一叫我，耳朵就先应了。",
+                       "display":  "你一叫我，\n耳朵就先应了。",
+                       "layout":  {
+                                      "fontSize":  32,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "先歇一小会儿，这儿还给你留着。",
+                       "display":  "先歇一小会儿，\n这儿还给你留着。",
+                       "layout":  {
+                                      "fontSize":  28,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "你慢慢想，我把尾巴收好等你。",
+                       "display":  "你慢慢想，\n我把尾巴收好等你。",
+                       "layout":  {
+                                      "fontSize":  25,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "不说话也挺好，安安静静待一会儿。",
+                       "display":  "不说话也挺好，\n安安静静待一会儿。",
+                       "layout":  {
+                                      "fontSize":  25,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "哼，知道你在啦，不用一直戳我。",
+                       "display":  "哼，知道你在啦，\n不用一直戳我。",
+                       "layout":  {
+                                      "fontSize":  28,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "我只是刚好没走，才不是特意等你。",
+                       "display":  "我只是刚好没走，\n才不是特意等你。",
+                       "layout":  {
+                                      "fontSize":  28,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "耳朵都竖起来了，这回看见我了吧。",
+                       "display":  "耳朵都竖起来了，\n这回看见我了吧。",
+                       "layout":  {
+                                      "fontSize":  28,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "夸我也得认真一点，敷衍可不算。",
+                       "display":  "夸我也得认真一点，\n敷衍可不算。",
+                       "layout":  {
+                                      "fontSize":  26,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "好啦，陪你这一回。下回……下回再说。",
+                       "display":  "好啦，陪你这一回。\n下回……下回再说。",
+                       "layout":  {
+                                      "fontSize":  26,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "花饰当然要戴正，我可是很讲究的。",
+                       "display":  "花饰当然要戴正，\n我可是很讲究的。",
+                       "layout":  {
+                                      "fontSize":  28,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "尾巴只有这一条，不许拿它当枕头。",
+                       "display":  "尾巴只有这一条，\n不许拿它当枕头。",
+                       "layout":  {
+                                      "fontSize":  28,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "发现我在偷看了？那又怎样。",
+                       "display":  "发现我在偷看了？\n那又怎样。",
+                       "layout":  {
+                                      "fontSize":  28,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "想让我笑？那你得再哄一句。",
+                       "display":  "想让我笑？\n那你得再哄一句。",
+                       "layout":  {
+                                      "fontSize":  28,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "别得意，我只是对你宽容一点。",
+                       "display":  "别得意，\n我只是对你宽容一点。",
+                       "layout":  {
+                                      "fontSize":  23,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "耳朵很怕痒，轻一点呀。",
+                       "display":  "耳朵很怕痒，\n轻一点呀。",
+                       "layout":  {
+                                      "fontSize":  32,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "你靠得这么近，我都不知道看哪里了。",
+                       "display":  "你靠得这么近，\n我都不知道看哪里了。",
+                       "layout":  {
+                                      "fontSize":  23,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "没有脸红，是这儿有点热。",
+                       "display":  "没有脸红，\n是这儿有点热。",
+                       "layout":  {
+                                      "fontSize":  32,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "嗯……知道啦，别再逗我了。",
+                       "display":  "嗯……知道啦，\n别再逗我了。",
+                       "layout":  {
+                                      "fontSize":  32,
+                                      "width":  228
+                                  }
+                   },
+                   {
+                       "text":  "耳朵一垂下来，什么心事都藏不住。",
+                       "display":  "耳朵一垂下来，\n什么心事都藏不住。",
+                       "layout":  {
+                                      "fontSize":  25,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "看、看什么呀，花饰又没有戴歪。",
+                       "display":  "看、看什么呀，\n花饰又没有戴歪。",
+                       "layout":  {
+                                      "fontSize":  28,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "别笑我，我只是有一点紧张。",
+                       "display":  "别笑我，\n我只是有一点紧张。",
+                       "layout":  {
+                                      "fontSize":  25,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "你一逗我，尾巴都不知道往哪放。",
+                       "display":  "你一逗我，\n尾巴都不知道往哪放。",
+                       "layout":  {
+                                      "fontSize":  23,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "好听的话慢一点说，我得缓一缓。",
+                       "display":  "好听的话慢一点说，\n我得缓一缓。",
+                       "layout":  {
+                                      "fontSize":  26,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "让我低会儿头，等脸上的热散了再说。",
+                       "display":  "让我低会儿头，\n等脸上的热散了再说。",
+                       "layout":  {
+                                      "fontSize":  23,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "猜猜我在想什么？猜错了也不告诉你。",
+                       "display":  "猜猜我在想什么？\n猜错了也不告诉你。",
+                       "layout":  {
+                                      "fontSize":  25,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "尾巴动了一下而已，不是在招手。",
+                       "display":  "尾巴动了一下而已，\n不是在招手。",
+                       "layout":  {
+                                      "fontSize":  26,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "这串流苏晃得好看，我就多看一眼。",
+                       "display":  "这串流苏晃得好看，\n我就多看一眼。",
+                       "layout":  {
+                                      "fontSize":  25,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "嘘，给发呆留一点地方。",
+                       "display":  "嘘，\n给发呆留一点地方。",
+                       "layout":  {
+                                      "fontSize":  25,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "我今天很乖吧？那就夸一句嘛。",
+                       "display":  "我今天很乖吧？\n那就夸一句嘛。",
+                       "layout":  {
+                                      "fontSize":  31,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "你再戳一下，我就再瞪你一小下。",
+                       "display":  "你再戳一下，\n我就再瞪你一小下。",
+                       "layout":  {
+                                      "fontSize":  25,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "耳朵朝着你呢，可别偷偷溜走。",
+                       "display":  "耳朵朝着你呢，\n可别偷偷溜走。",
+                       "layout":  {
+                                      "fontSize":  32,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "我没捣乱，只是想占你一点注意。",
+                       "display":  "我没捣乱，\n只是想占你一点注意。",
+                       "layout":  {
+                                      "fontSize":  23,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "衣角要理平，小脾气倒可以留一点。",
+                       "display":  "衣角要理平，\n小脾气倒可以留一点。",
+                       "layout":  {
+                                      "fontSize":  23,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "先把眉头松开，不然我也要跟着皱啦。",
+                       "display":  "先把眉头松开，\n不然我也要跟着皱啦。",
+                       "layout":  {
+                                      "fontSize":  23,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "水杯就在手边吗？先润润嗓子吧。",
+                       "display":  "水杯就在手边吗？\n先润润嗓子吧。",
+                       "layout":  {
+                                      "fontSize":  28,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "眼睛累了，就看看远一点的地方。",
+                       "display":  "眼睛累了，\n就看看远一点的地方。",
+                       "layout":  {
+                                      "fontSize":  23,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "肩膀放下来，不用一直绷得这么紧。",
+                       "display":  "肩膀放下来，\n不用一直绷得这么紧。",
+                       "layout":  {
+                                      "fontSize":  23,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "忙过这一阵，给自己留点好吃的。",
+                       "display":  "忙过这一阵，\n给自己留点好吃的。",
+                       "layout":  {
+                                      "fontSize":  25,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "歇一会儿也没关系，认真又不是比谁坐得久。",
+                       "display":  "歇一会儿也没关系，\n认真又不是比谁坐得久。",
+                       "layout":  {
+                                      "fontSize":  21,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "今天做得够多了，也该轮到你被照顾。",
+                       "display":  "今天做得够多了，\n也该轮到你被照顾。",
+                       "layout":  {
+                                      "fontSize":  25,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "心里乱的时候，先陪我安静一小会儿。",
+                       "display":  "心里乱的时候，\n先陪我安静一小会儿。",
+                       "layout":  {
+                                      "fontSize":  23,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "没做好的那一点，不用拿来责怪自己。",
+                       "display":  "没做好的那一点，\n不用拿来责怪自己。",
+                       "layout":  {
+                                      "fontSize":  25,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "先好好吃饭，再和难题较劲。",
+                       "display":  "先好好吃饭，\n再和难题较劲。",
+                       "layout":  {
+                                      "fontSize":  32,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "好啦，深呼吸。这回我陪你慢下来。",
+                       "display":  "好啦，深呼吸。\n这回我陪你慢下来。",
+                       "layout":  {
+                                      "fontSize":  25,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "先挑最小的一步，做完了再叫我看。",
+                       "display":  "先挑最小的一步，\n做完了再叫我看。",
+                       "layout":  {
+                                      "fontSize":  28,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "思路先留在纸上，不用一下子全想明白。",
+                       "display":  "思路先留在纸上，\n不用一下子全想明白。",
+                       "layout":  {
+                                      "fontSize":  23,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "这一步有点绕，我们换个方向看看。",
+                       "display":  "这一步有点绕，\n我们换个方向看看。",
+                       "layout":  {
+                                      "fontSize":  25,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "先把手里的存好，再放心去歇一会儿。",
+                       "display":  "先把手里的存好，\n再放心去歇一会儿。",
+                       "layout":  {
+                                      "fontSize":  25,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "卡住就停一停，尾巴打结也得慢慢解。",
+                       "display":  "卡住就停一停，\n尾巴打结也得慢慢解。",
+                       "layout":  {
+                                      "fontSize":  23,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "今天多明白一点，就值得悄悄得意一下。",
+                       "display":  "今天多明白一点，\n就值得悄悄得意一下。",
+                       "layout":  {
+                                      "fontSize":  23,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "那个小问题先圈住，别让它挤满脑袋。",
+                       "display":  "那个小问题先圈住，\n别让它挤满脑袋。",
+                       "layout":  {
+                                      "fontSize":  25,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "一次只想一件事，我替你把心急按住。",
+                       "display":  "一次只想一件事，\n我替你把心急按住。",
+                       "layout":  {
+                                      "fontSize":  25,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "先试一个小例子，说不定就通啦。",
+                       "display":  "先试一个小例子，\n说不定就通啦。",
+                       "layout":  {
+                                      "fontSize":  29,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "做到这里辛苦了，剩下的留一点给明天。",
+                       "display":  "做到这里辛苦了，\n剩下的留一点给明天。",
+                       "layout":  {
+                                      "fontSize":  23,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "这轮回复好了，来看看吧。",
+                       "display":  "这轮回复好了，\n来看看吧。",
+                       "layout":  {
+                                      "fontSize":  32,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "刚才那一轮结束啦，你可以看看结果了。",
+                       "display":  "刚才那一轮结束啦，\n你可以看看结果了。",
+                       "layout":  {
+                                      "fontSize":  25,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "新的回复到了，我替你留意着呢。",
+                       "display":  "新的回复到了，\n我替你留意着呢。",
+                       "layout":  {
+                                      "fontSize":  28,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "等到回复啦，要不要过来看看？",
+                       "display":  "等到回复啦，\n要不要过来看看？",
+                       "layout":  {
+                                      "fontSize":  28,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "这轮有结果了，耳朵都替你竖起来啦。",
+                       "display":  "这轮有结果了，\n耳朵都替你竖起来啦。",
+                       "layout":  {
+                                      "fontSize":  23,
+                                      "width":  236
+                                  }
+                   },
+                   {
+                       "text":  "回复已经好了，接下来听你的。",
+                       "display":  "回复已经好了，\n接下来听你的。",
+                       "layout":  {
+                                      "fontSize":  32,
+                                      "width":  236
+                                  }
+                   }
+               ]
+}

@@ -197,6 +197,8 @@ html[${ROOT_ATTRIBUTE}="on"] body {
 }
 html[${ROOT_ATTRIBUTE}="on"] #root, html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-page-surface="true"] { background: transparent !important; }
 html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-surface], html[${ROOT_ATTRIBUTE}="on"] [data-sidebar-navigation-root] { background: transparent !important; }
+/* The decorative fade keeps its semantic attributes across CSS class renames. */
+html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-content-top-fade] > [aria-hidden="true"],
 html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-main-content-top-fade] > [class*="_MainContentTopFade_"] { background: transparent !important; }
 /* Full-page sections and site tab panels paint opaque surfaces over the wallpaper. */
 html[${ROOT_ATTRIBUTE}="on"] [data-app-shell-focus-area="main"] > [class~="bg-surface"],

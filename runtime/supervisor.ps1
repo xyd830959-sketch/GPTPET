@@ -2,6 +2,16 @@ param([switch]$CheckOnly)
 $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot 'supervisor-task.ps1')
 $appDir=Split-Path $PSScriptRoot -Parent
+$registrationConfig=Get-Content -LiteralPath (Join-Path $appDir 'installation.json') -Raw -Encoding UTF8|ConvertFrom-Json
+if($registrationConfig.characterAppDir){
+  $characterApp=[IO.Path]::GetFullPath([string]$registrationConfig.characterAppDir)
+  $characterConfig=Get-Content -LiteralPath (Join-Path $characterApp 'installation.json') -Raw -Encoding UTF8|ConvertFrom-Json
+  if([IO.Path]::GetFullPath([string]$characterConfig.appDir).TrimEnd('\')-ine $characterApp.TrimEnd('\')){throw 'Character installation identity mismatch.'}
+  foreach($required in @('widget.ps1','runtime\start-widget.ps1')){
+    if(!(Test-Path -LiteralPath (Join-Path $characterApp $required) -PathType Leaf)){throw 'Selected character application is incomplete.'}
+  }
+  $appDir=$characterApp
+}
 $info=Get-WidgetSupervisorInfo $appDir
 if(!('GptWidgetSupervisorNative' -as [type])){
 Add-Type -TypeDefinition @'

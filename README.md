@@ -4,6 +4,8 @@ GPTPET 是 [GPT-Niang](https://github.com/T7moris/GPT-Niang) **v1.2.5 的 Window
 
 当前正式版源码：`1.2.6`。原项目作者和贡献者的版权保留；角色图片不属于代码的 MIT 授权范围。[来源与许可](THIRD_PARTY_NOTICES.md)
 
+狐娘动画预览版的源码和当前成品资源位于 [fox-spirit](fox-spirit/README.md)，使用独立本地入口；不覆盖根目录正式版。包含动作菜单、反应音、情境台词及回复完成提醒，所需 FFmpeg 播放程序单独准备。
+
 ## 来源、许可与审阅范围
 
 原 GPTPET 仓库现已公开。本版本在提交 `bd4a972d5ff9fce4db3936ca188e7f87de5db5ed` 的工程准备基础上，整合保留龙娘的来源与素材说明；原开发历史保留，不伪装为全新原创。此前另行导出的本地源码快照不携带 `.git`，这与本仓库保留历史是两回事。[候选导出与整合来源](docs/CANDIDATE_ORIGIN.md)

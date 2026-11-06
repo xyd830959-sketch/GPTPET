@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "name": "fox-spirit-approved",
+  "status": "local-animation-preview-ready",
+  "stills": {
+    "idle": "character-reference.png",
+    "click": "click-keyframe-v2-tail-right.png",
+    "drag": "drag-crouch-keyframe-v6-small-ears.png"
+  },
+  "playback": {
+    "width": 480,
+    "height": 528,
+    "fps": 60,
+    "staticClickMs": 1500,
+    "transitionMs": 120
+  },
+  "anchors": {
+    "idleFootY": 1253,
+    "clickFootY": 1280,
+    "dragFootY": 1185,
+    "targetFootY": 506
+  },
+  "clips": {
+    "idle": {
+      "path": "clips-approved-20261103/idle.webm",
+      "prepared": true
+    },
+    "click": {
+      "path": "clips-approved-20261103/click.webm",
+      "prepared": true
+    },
+    "dragEnter": {
+      "path": "clips-approved-20261103/drag-enter.webm",
+      "prepared": true
+    },
+    "dragLoop": {
+      "path": "clips-approved-20261103/drag-loop.webm",
+      "prepared": true
+    },
+    "dragExit": {
+      "path": "clips-approved-20261103/drag-return.webm",
+      "prepared": true
+    }
+  },
+  "provenance": {
+    "generator": "Existing H3 plus local 2D motion and loop editing",
+    "mediaRevision": "approved-idle-fixed-20261103",
+    "formalPluginDeployed": false,
+    "appliedToDevelopmentWidget": true,
+    "extraActionsRevision": "continuous-boundary-v2-20261103"
+  },
+  "actions": {
+    "wave": {
+      "path": "extra-actions-continuous-20261103-v2/wave.webm",
+      "prepared": true,
+      "cueFrame": 24
+    },
+    "laugh": {
+      "path": "extra-actions-continuous-20261103-v2/laugh.webm",
+      "prepared": true,
+      "cueFrame": 21
+    },
+    "yawn": {
+      "path": "extra-actions-continuous-20261103-v2/yawn.webm",
+      "prepared": true,
+      "cueFrame": 50
+    }
+  }
+}
