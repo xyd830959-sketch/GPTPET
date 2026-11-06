@@ -1,12 +1,12 @@
 ﻿# Contextual dialogue; all UI work stays on the widget dispatcher.
 function Initialize-WidgetDialogue {
   $script:dialogueContexts=([IO.File]::ReadAllText((Join-Path $script:appDir 'assets/dialogue-contexts.json'))|ConvertFrom-Json).contexts
-  $script:dialogueHistory=@{};$script:dialogueClickSequence=$false
+  $script:dialogueHistory=@{}
   $script:dialogueReason='none';$script:dialogueLastAction='';$script:dialogueLastActionAt=0L
   $script:dialogueNextIdle=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()+(Get-Random -Minimum 120000 -Maximum 240001)
   $script:dialogueSeen=@{};$script:dialoguePending=$null
   $script:dialogueStartedAt=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
-  $script:dialogueRevision='quota-first-click-v2'
+  $script:dialogueRevision='bubble-aware-click-v3'
 }
 function Get-ContextDialogue([string]$Context){
   $settings=Get-WidgetQuoteSettings $script:dataDir
@@ -44,7 +44,6 @@ function Show-WidgetDialogue([string]$Context='manual',[long]$Now=[DateTimeOffse
     $script:dialogueNextIdle=$Now+(Get-Random -Minimum 120000 -Maximum 240001)
     $script:dialogueLastAction=$Context;$script:dialogueLastActionAt=$Now
   }
-  if($Context-ne 'click'){$script:dialogueClickSequence=$false}
   $script:dialogueReason=$Context
   Show-Quota 'quote' $Context
   return $true

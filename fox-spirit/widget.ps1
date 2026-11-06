@@ -353,12 +353,15 @@ function Switch-Scene([string]$mode,[string]$Context='manual'){
 }
 function Next-Bubble {
   if($script:collapsed){return}
-  Hide-Quota
+  $null=Show-WidgetDialogue 'click'
 }
 function Click-Character {
+  if(!$script:collapsed){
+    Next-Bubble
+    return
+  }
   if($script:characterPlayer){$null=$script:characterPlayer.Click()}
-  if($script:collapsed -or !$script:dialogueClickSequence){$script:dialogueClickSequence=$true;Show-Quota}
-  else{$null=Show-WidgetDialogue 'click'}
+  Show-Quota
 }
 function Show-Quota([string]$Mode='quota',[string]$Context='manual') {
   if($Mode-eq 'quota'){$script:dialogueReason='quota'}
@@ -385,7 +388,7 @@ function Show-Quota([string]$Mode='quota',[string]$Context='manual') {
 }
 function Hide-Quota {
   if($script:collapsed){return}
-  $script:collapsed=$true;$script:bubbleEpoch++;$script:dialogueClickSequence=$false
+  $script:collapsed=$true;$script:bubbleEpoch++
   if($script:widgetColors){Update-WidgetColorScene}
   $script:sceneDeadline=0
   if($script:resetPhaseTimer){$script:resetPhaseTimer.Stop();$script:resetPhaseTimer=$null}
